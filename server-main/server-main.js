@@ -58,6 +58,7 @@ async function saveAudioRecordToFile(message, clientID) {
   const filePath = path.join(__dirname, 'audio', fileName); // __dirname gives the directory of the current module
 
   ffmpeg(audioStream)
+  .audioChannels(1)
   .outputFormat('flac')
   .on('error', (err) => {
       console.error('Error during conversion:', err);
@@ -65,7 +66,7 @@ async function saveAudioRecordToFile(message, clientID) {
   .on('end', () => {
   console.log('Conversion to FLAC successful!');
   }).save(filePath);
-
+  
   return fileName;
 };
 

@@ -1,3 +1,5 @@
+const { exec } = require('child_process');
+
 const APP_CONFIG = require('../app-config');
 const server_main_port = APP_CONFIG.server_main_port;
 
@@ -55,48 +57,61 @@ async function saveAudioRecordToFile(message, clientID) {
   audioStream.push(null);
 
   const fileName = `C${clientID}T${serverTime.year}${serverTime.month}${serverTime.day}${serverTime.hour}${serverTime.minute}${serverTime.second}.flac`;
-  const filePath = path.join(__dirname, 'audio', fileName); // __dirname gives the directory of the current module
+  const filePath = path.join(__dirname, 'audio_files', fileName); // __dirname gives the directory of the current module
 
-  ffmpeg(audioStream)
+  await ffmpeg(audioStream)
   .audioChannels(1)
   .outputFormat('flac')
   .on('error', (err) => {
       console.error('Error during conversion:', err);
   })
   .on('end', () => {
-  console.log('Conversion to FLAC successful!');
+
   }).save(filePath);
   
   return fileName;
 };
 
-async function analyse(clientID, message) {
-  const fileName = await saveAudioRecordToFile(message, clientID);
-  const result = await runModel(fileName);
+async function runModel(clientID, fileName) {
+  const pythonScriptPath = 'main.py';
 
-  if (result === 1) {
-      try{
-        clients.forEach((client) => {
-          if (client.id === clientID && client.readyState === WebSocket.OPEN) {    
-            if (result === 1) {
-              client.send('Deepfake');
-            }
-          }
-        });
-      } catch (error) {
-          console.log('Error Occured');
+  const filePath = 'audio_files/' + fileName;
+
+  const command = `python ${pythonScriptPath} --single_file ${filePath}`;
+
+  exec(command, (error, stdout, stderr) => {
+      if (error) {
+          console.error(`Error analysing file: ${error.message}`);
+          return 'Can Not Open File';
       }
-  }
-}
 
-async function runModel(fileName) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const result = Math.random() < 0.5 ? 0 : 1;
-      resolve(result);
-    }, 3000);
+      if (stderr) {
+          console.error(`Python script error: ${stderr}`);
+          return 'Internal Server Error';
+      }
+
+      const evaluatedScore = parseFloat(stdout);
+
+      if (parseFloat(evaluatedScore) > -2.9) {
+        console.log(`File ${fileName} is suspected of deepfake with score = ${parseFloat(evaluatedScore)}`);
+    
+        try{
+          clients.forEach((client) => {
+            if (client.id === clientID && client.readyState === WebSocket.OPEN) {    
+              client.send('Deepfake Detected');
+            }
+          });
+        } catch (error) {
+            console.log('Error occured while transmitting message to client with id: ' + clientID);
+        }
+      }
   });
 };
+
+async function analyse(clientID, message) {
+  const fileName = await saveAudioRecordToFile(message, clientID);
+  await runModel(clientID, fileName);
+}
 
 const clients = [];
 

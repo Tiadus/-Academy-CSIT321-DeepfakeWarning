@@ -12,10 +12,6 @@ export default function Index() {
       }}
     >
       <Button title='Enter' onPress={() => {
-        router.push('/home')
-      }}/>
-
-      <Button title='Auth' onPress={() => {
         router.push('/sign-in')
       }}/>
     </View>

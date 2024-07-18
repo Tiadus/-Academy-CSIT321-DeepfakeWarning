@@ -4,40 +4,37 @@ import { Link, router } from "expo-router";
 import { useGlobalContext } from "../../context/GlobalStatus";
 
 export default function Signin() {
-  const {user, setUser} = useGlobalContext();
-  const {webSocket, setWebSocket} = useGlobalContext();
+  const {config, user, setUser, setWebSocket} = useGlobalContext();
 
   useEffect(() => {
     if (user !== null) {
-      const socket = new WebSocket('ws://localhost:4000');
+      try {
+        const socket = new WebSocket(config.server_main_ws);
   
-      socket.onopen = () => {
-        console.log('WebSocket connection opened');
-        socket.send(user.clientID);
-      };
-      
-      socket.onmessage = (event) => {
-        console.log('Received message:', event.data);
-        setMessage(event.data);
-      };
-      
-      socket.onerror = (error) => {
-        console.log('WebSocket error:', error);
-      };
-      
-      socket.onclose = (event) => {
-        console.log('WebSocket connection closed:', event);
-      };
-
-      setWebSocket(socket)
+        socket.onopen = () => {
+          console.log('WebSocket connection opened');
+          router.replace('/home');
+          socket.send(user.clientID);
+        };
+        
+        socket.onmessage = (event) => {
+          console.log('Received message:', event.data);
+        };
+        
+        socket.onerror = (error) => {
+          console.log('WebSocket error:', error);
+        };
+        
+        socket.onclose = (event) => {
+          console.log('WebSocket connection closed:', event);
+        };
+  
+        setWebSocket(socket)
+      } catch (error) {
+        console.log(error);
+      }
     }
   }, [user]);
-
-  useEffect(() => {
-    if (webSocket !== null) {
-      router.replace('/home');
-    }
-  }, [webSocket]);
   
   const handleLogin = async () => {
     setUser({

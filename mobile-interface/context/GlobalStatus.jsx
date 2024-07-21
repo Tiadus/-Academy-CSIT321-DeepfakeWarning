@@ -7,7 +7,6 @@ const GlobalProvider = ({ children }) => {
   const [config, setConfig] = useState(require('./app-config'));
   const [user, setUser] = useState(null);
   const [webSocket, setWebSocket] = useState(null);
-  const [agoraEngine, setAgoraEngine] = useState(null);
 
   return (
     <GlobalContext.Provider
@@ -17,8 +16,6 @@ const GlobalProvider = ({ children }) => {
         setUser,
         webSocket,
         setWebSocket,
-        agoraEngine,
-        setAgoraEngine
       }}
     >
       {children}

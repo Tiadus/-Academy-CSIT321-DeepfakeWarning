@@ -1,54 +1,56 @@
-import React, { useEffect, useState } from "react";
-import {View, Text, Button} from 'react-native';
+import { Text, View, SafeAreaView } from "react-native";
+import { WebView } from 'react-native-webview';
+import React, { useEffect, useState, useRef} from "react";
 import { router } from "expo-router";
 import { useGlobalContext } from "../context/GlobalStatus";
 
-import {
-    ClientRoleType,
-} from 'react-native-agora';
-
 export default function Incall() {
-    const {config, agoraEngine, user} = useGlobalContext();
-    const [inCall, setInCall] = useState(true);
 
-    useEffect(() => {
-        if (agoraEngine === null) {
-            console.log('Agora Engine Unavailable');
-        }
+  const {user} = useGlobalContext();
+  const [viewLoaded, setViewLoaded] = useState(false);
+  const webViewRef = useRef(null);
 
-        if (agoraEngine !== null && user !== null) {
-            try {
-                // Call the joinChannel method to join the channel
-                agoraEngine.joinChannel(config.token, config.channel, parseInt(user.clientID), {
-                  // Set the user role to broadcaster
-                  clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-              });
-                console.log('Joining Channel')
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    }, []);
+  const handleWebViewError = (syntheticEvent) => {
+    const { nativeEvent } = syntheticEvent;
+    console.error('WebView error: ', nativeEvent);
+    // Handle the error, e.g., show an alert or retry logic
+  };
 
-    useEffect(() => {
-        if (inCall === false) {
-            agoraEngine.leaveChannel();
-            router.back();
-        }
-    }, [inCall])
+  const handleHttpError = (syntheticEvent) => {
+    const { nativeEvent } = syntheticEvent;
+    console.error('HTTP error: ', nativeEvent);
+    // Handle the HTTP error, e.g., show an alert or retry logic
+  };
 
-    return (
-        <View
-        style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
+  useEffect(() => {
+    if (viewLoaded === true) {
+      const message = `${user.clientID}`
+      webViewRef.current.postMessage(message);
+    }
+  }, [viewLoaded])
+
+  const onMessage = (event) => {
+    const message = event.nativeEvent.data;
+    if (message === "End Call") {
+      router.back();
+    }
+  };
+
+  return (
+    <SafeAreaView style={{flex: 1}}>
+      <WebView
+        ref={webViewRef}
+        source={{uri: 'http://192.168.56.1:3000/client'}}
+        onLoad={()=>{
+          setViewLoaded(true)
         }}
-        >
-            <Text>In Call Screen</Text>
-            <Button title='End Call' onPress={() => {
-                setInCall(false);
-            }}/>
-        </View>
-    )
-}
+        javaScriptEnabled
+        domStorageEnabled
+        originWhitelist={['*']}
+        onMessage={onMessage}
+        onError={handleWebViewError}
+        onHttpError={handleHttpError}
+      />
+    </SafeAreaView>
+  );
+};

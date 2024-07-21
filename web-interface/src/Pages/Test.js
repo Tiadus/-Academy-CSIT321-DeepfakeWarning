@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Gate from '../Components/Gate';
+import Gate from '../Components/Gate1';
 import VoiceCall from '../Components/VoiceCall';
 
 const app_config = require('../app-config.js');

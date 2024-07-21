@@ -50,7 +50,7 @@ const ClientCall = ({clientID, webSocket}) => {
           audioTracks.localAudioTrack.close();
         }
         
-        rtcClient.unpublish();
+        //rtcClient.unpublish();
         rtcClient.leave();
 
         if(window.ReactNativeWebView) { //Ensure window.ReactNativeWebView is there to prevent crashing

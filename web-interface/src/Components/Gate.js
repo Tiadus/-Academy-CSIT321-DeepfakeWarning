@@ -31,8 +31,7 @@ const Gate = ({setClientID}) => {
                     </div>
                     <input 
                         ref={clientIDRef}
-                        type="text" 
-                        id="inputField" 
+                        type="number" 
                         class="form-control mb-3" 
                         style={{textAlign: 'center', borderColor: 'black', borderWidth: '3px', borderStyle: 'solid', borderRadius: '30px'}} 
                         placeholder="Enter An Identifier"

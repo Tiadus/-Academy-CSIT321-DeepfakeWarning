@@ -103,9 +103,13 @@ const AdminCall = ({clientID, webSocket, setWebSocket}) => {
         }
   
         let handleUserLeft = async (user) => {
-          delete audioTracks.remoteAudioTracks[user.uid];
-      
-          setIsRecording(false);
+          try{
+            delete audioTracks.remoteAudioTracks[user.uid];
+            endCall();
+            setIsRecording(false);
+          } catch(error) {
+            alert(error)
+          }
         }
     
         rtcClient.on('user-joined', handleUserJoined);
@@ -201,8 +205,10 @@ const AdminCall = ({clientID, webSocket, setWebSocket}) => {
 
     let endCall = async () => {
       if (isRecording === true) {
+        alert('hello');
         setIsRecording(false);
       } else if (isRecording === false) {
+        alert('hey false');
         setModalIncallShow(false);
       }
       setStatus('Ringing');

@@ -9,13 +9,12 @@ const Client = ({}) => {
   const [wsError, setWsError] = useState(false);
 
   useEffect(() => {
-    const openWebSocket = async (clientID) => {
+    const openWebSocket = async (clientID, webSocketID) => {
       try {
         const ws = new WebSocket(app_config.server_main_ws);
         ws.onopen = () => {
-          ws.send(clientID);
-          const agoraId = parseInt(clientID) * -1
-          setClientID(agoraId);
+          ws.send(webSocketID);
+          setClientID(clientID);
         };
         ws.onmessage = (message) => {
           console.log(message.data);
@@ -23,20 +22,25 @@ const Client = ({}) => {
         ws.onerror = (message) => {
           setWsError(true);
         }
+        ws.onclose = (message) => {
+          alert('Close');
+          setWsError(true);
+        }
         setWebSocket(ws);
       } catch (error) {
-          console.error('Error connecting WebSocket:', error);
+          alert('Error connecting WebSocket:', error);
       }
     }
 
     document.addEventListener("message", function (event) {
       const reactNativeInput = event.data.split(',');
-      const webSocketID = '-' + reactNativeInput[0];
+      const clientID = reactNativeInput[0]
+      const webSocketID = '-' + clientID;
       if (isNaN(webSocketID) === true) {
           alert('Invalid Input: ' + webSocketID);
       } else {
           try {
-            openWebSocket(webSocketID);
+            openWebSocket(clientID, webSocketID);
           } catch (error) {
               alert('An Error Has Occured!');
           }
@@ -64,7 +68,7 @@ const Client = ({}) => {
           </div>
         </div>
       }
-      {clientID !== 0 && <ClientCall clientID={parseInt(clientID)} webSocket={webSocket} setWebSocket={setWebSocket}/>}
+      {clientID !== 0 && <ClientCall clientID={clientID} webSocket={webSocket} setWebSocket={setWebSocket}/>}
     </div>
   );
 };

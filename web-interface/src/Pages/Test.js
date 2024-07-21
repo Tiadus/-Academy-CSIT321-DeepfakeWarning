@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import Gate from '../Components/Gate1';
+import Gate from '../Components/Gate';
 import VoiceCall from '../Components/VoiceCall';
 
 const app_config = require('../app-config.js');
 
-const Test = ({}) => {
+const Test = () => {
     const [clientID, setClientID] = useState(null);
     const [webSocket, setWebSocket] = useState(null);
   

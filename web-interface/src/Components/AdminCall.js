@@ -3,280 +3,288 @@ import AgoraRTC from 'agora-rtc-sdk-ng';
 import AdminIncallModal from './AdminIncallModal';
 const config = require('../app-config')
 
-const AdminCall = ({clientID, webSocket, setWebSocket}) => {
-  const [status, setStatus] = useState('Ringing');
-  const [modalIncallShow, setModalIncallShow] = useState(false);
-
-  const [isRecording, setIsRecording] = useState(false);
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [stream, setStream] = useState(null);
-  const [intervalID, setIntervalID] = useState(null);
+const AdminCall = ({clientID, webSocket, setClientID}) => {
   const [rtcClient, setRtcClient] = useState(null);
-  const [audioTracks, setAudioTracks] = useState({
+
+  const [adminCallState, setAdminCallState] = useState({
     localAudioTrack: null,
-    remoteAudioTracks: []
-  });
-  const [audioInputType, setAudioInputType] = useState('mic'); //file
-  
-    useEffect(() => {
-      const startRecording = () => {
-        if (intervalID === null) {
-          if (isRecording === true) {
-            setIntervalID(setInterval(() => {
-              if (mediaRecorder) {
-                mediaRecorder.stop();
-              }
-              if (mediaRecorder) {
-                mediaRecorder.start();
-              }
-            },5000))
-          }
-        }
-      }
-  
-      if (isRecording === false) {
-        if (intervalID !== null) {
-          clearInterval(intervalID);
-          setIntervalID(null);
-  
-          if (mediaRecorder) {
-            mediaRecorder.stop();
-          }
-  
-          if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            setStream(null);
-          }
+    remoteAudioTrack: null,
+    modalIncallShow: false,
+    callStatus: 'Ringing',
+    mediaRecorder: null,
+    interval: null,
+    audioInputType: 'mic'
+  })
 
-          setModalIncallShow(false);
-        }
-      }
-  
-      if (isRecording === true) {
-        startRecording();
-      }
-    }, [isRecording]);
-  
-    const recordAudioStream = (audioTrack) => {
-      const mediaRecorder = new MediaRecorder(new MediaStream([audioTrack]));
-  
-      mediaRecorder.ondataavailable = (e) => {
-        if (webSocket && webSocket.readyState === WebSocket.OPEN) {
-          webSocket.send(e.data);
-        }
-      };
-    
-      mediaRecorder.onstop = () => {
+  useEffect(() => {
+    if (rtcClient === null) {
+      const rtcClient = AgoraRTC.createClient({mode:'rtc', codec:'vp8'});
+
+      const handleUserJoined = async (user) => {
         //Place Holder
-      };
-    
-      mediaRecorder.start();
-    
-      setIsRecording(true);
-      setMediaRecorder(mediaRecorder);
-    };
-  
-    useEffect(() => {
-      if (rtcClient === null) {
-        const rtcClient = AgoraRTC.createClient({mode:'rtc', codec:'vp8'});
-  
-        const handleUserJoined = async (user) => {
-          //Place Holder
-        }
-      
-        const handleUserPublished = async (user, mediaType) => {
-          await rtcClient.subscribe(user, mediaType);
-      
-          if (mediaType === 'audio') {
-            let temp = audioTracks.remoteAudioTracks;
-            temp[user.uid] = [user.audioTrack];
-  
-            setAudioTracks(prevState => ({
-              ...prevState,
-              remoteAudioTracks: temp
-            }));
-  
-            user.audioTrack.play();
-            setStatus('Incall');
-            recordAudioStream(user.audioTrack.mediaStreamTrack);
-          }
-        }
-  
-        let handleUserLeft = async (user) => {
-          try{
-            delete audioTracks.remoteAudioTracks[user.uid];
-            endCall();
-            setIsRecording(false);
-          } catch(error) {
-            alert(error)
-          }
-        }
-    
-        rtcClient.on('user-joined', handleUserJoined);
-        rtcClient.on('user-published', handleUserPublished);
-        rtcClient.on("user-left", handleUserLeft);
-  
-        setRtcClient(rtcClient);
+        setAdminCallState(prevState => ({
+          ...prevState,
+          callStatus: 'Incall'
+        }))
       }
-    }, []);
-  
-    useEffect(() => {
-      if (audioTracks.localAudioTrack !== null) {
-        rtcClient.publish(audioTracks.localAudioTrack);
-      }
-    }, [audioTracks.localAudioTrack]);
+    
+      const handleUserPublished = async (user, mediaType) => {
+        await rtcClient.subscribe(user, mediaType);
+    
+        if (mediaType === 'audio') {
+          user.audioTrack.play();
 
-    useEffect(() => {
-      if (modalIncallShow === false) {
-        if (rtcClient !== null) {
-          if (audioTracks.localAudioTrack !== null) {
-            audioTracks.localAudioTrack.stop();
-            audioTracks.localAudioTrack.close();
+          const mediaRecorder = new MediaRecorder(new MediaStream([user.audioTrack.mediaStreamTrack]));
+  
+          mediaRecorder.ondataavailable = (e) => {
+            if (webSocket && webSocket.readyState === WebSocket.OPEN) {
+              webSocket.send(e.data);
+            }
+          };
+        
+          mediaRecorder.onstop = () => {
+            //Place Holder
+          };
+
+          setAdminCallState(prevState => ({
+            ...prevState,
+            remoteAudioTrack: user.audioTrack,
+            mediaRecorder: mediaRecorder
+          }))
+        }
+      }
+
+      let handleUserLeft = async (user) => {
+        try{
+          if (adminCallState.mediaRecorder) {
+            adminCallState.mediaRecorder.stop();
           }
 
+          setAdminCallState(prevState => ({
+            ...prevState,
+            remoteAudioTrack: null,
+            modalIncallShow: false
+          }))
+        } catch(error) {
+          console.log(error);
+        }
+      }
+  
+      rtcClient.on('user-joined', handleUserJoined);
+      rtcClient.on('user-published', handleUserPublished);
+      rtcClient.on("user-left", handleUserLeft);
+
+      setRtcClient(rtcClient);
+    }
+  }, [rtcClient, webSocket, adminCallState.mediaRecorder]); //NOTE []
+
+  useEffect(() => {
+    if (adminCallState.localAudioTrack !== null) {
+      rtcClient.publish(adminCallState.localAudioTrack);
+    }
+  }, [adminCallState.localAudioTrack, rtcClient]); //NOTE adminCallState.localAudioTrack
+
+  useEffect(() => {
+    if (adminCallState.mediaRecorder !== null && adminCallState.mediaRecorder.state === 'inactive') {
+      adminCallState.mediaRecorder.start();
+
+      setAdminCallState(prevState => ({
+        ...prevState,
+        interval: setInterval(() => {
+          adminCallState.mediaRecorder.stop();
+          adminCallState.mediaRecorder.start();
+        },5000)
+      }))
+    }
+
+    if (adminCallState.mediaRecorder === null) {
+      if (adminCallState.interval !== null) {
+        clearInterval(adminCallState.interval);
+        setAdminCallState(prevState => ({
+          ...prevState,
+          interval: null
+        }));
+      }
+    }
+  }, [adminCallState.mediaRecorder, adminCallState.interval]); //NOTE adminCallState.mediaRecorder
+
+  useEffect(() => {
+    if (adminCallState.modalIncallShow === false) {
+      if (rtcClient !== null) {
+        if (rtcClient.localTracks.length !== 0) {
           rtcClient.unpublish();
           rtcClient.leave();
         }
+
+        if (adminCallState.interval !== null) {
+          clearInterval(adminCallState.interval)
+        }
+  
+        if (adminCallState.mediaRecorder !== null && adminCallState.mediaRecorder.state === 'recording') {
+          adminCallState.mediaRecorder.stop();
+        }
+
+        if (adminCallState.localAudioTrack !== null) {
+          if (adminCallState.audioInputType === 'file') {
+            adminCallState.localAudioTrack.stopProcessAudioBuffer();
+          }
+          adminCallState.localAudioTrack.stop();
+          adminCallState.localAudioTrack.close();
+
+          setAdminCallState(prevState => ({
+            ...prevState,
+            localAudioTrack: null,
+            remoteAudioTrack: null,
+            interval: null,
+            mediaRecorder: null,
+          }))
+        }
       }
-    }, [modalIncallShow])
-  
-    let initRtc = async () => {
-      await rtcClient.join(config.appId, config.channel, config.token, clientID);
-  
-      const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      setAudioTracks(prevState => ({
+    }
+  }, [adminCallState.modalIncallShow, adminCallState.localAudioTrack, 
+      adminCallState.remoteAudioTrack, adminCallState.audioInputType,
+      rtcClient, adminCallState.mediaRecorder, adminCallState.interval]) //NOTE adminCallState.modalIncallShow
+
+  let initRtc = async () => {
+    await rtcClient.join(config.appId, config.channel, config.token, clientID);
+
+    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+
+    setAdminCallState(prevState => ({
+      ...prevState,
+      localAudioTrack: localAudioTrack,
+      modalIncallShow: true
+    }))
+  }
+
+  const handleInputSwitchToMicrophone = async () => {
+    adminCallState.localAudioTrack.stopProcessAudioBuffer();
+    adminCallState.localAudioTrack.stop();
+    adminCallState.localAudioTrack.close();
+
+    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+    setAdminCallState(prevState => ({
+      ...prevState,
+      localAudioTrack: localAudioTrack,
+      audioInputType: 'mic'
+    }))
+  }
+
+  const handleInputSwitchToAudioFile = async () => {
+    const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
+      source: '/audiofiles/sample.flac'
+    });
+
+    fileAudioTrack.startProcessAudioBuffer();
+
+    adminCallState.localAudioTrack.stop();
+    adminCallState.localAudioTrack.close();
+
+    setAdminCallState(prevState => ({
+      ...prevState,
+      localAudioTrack: fileAudioTrack,
+      audioInputType: 'file'
+    }))
+  }
+
+  const handleAnswerWithAudioFile = async () => {
+    await rtcClient.join(config.appId, config.channel, config.token, clientID);
+
+    const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
+      source: '/audiofiles/fake_sample.mp3'
+    });
+
+    fileAudioTrack.startProcessAudioBuffer();
+
+    setAdminCallState(prevState => ({
+      ...prevState,
+      localAudioTrack: fileAudioTrack,
+      audioInputType: 'file',
+      callStatus: 'Incall',
+      modalIncallShow: true
+    }))
+  }
+
+  let endCall = async () => {
+    try{
+      setAdminCallState(prevState => ({
         ...prevState,
-        localAudioTrack: localAudioTrack
-      }));
-
-      setModalIncallShow(true);
+        modalIncallShow: false,
+        callStatus: 'Ringing'
+      }))
+    } catch(error) {
+      console.log(error);
     }
+  }
 
-    const handleInputSwitchToMicrophone = async () => {
-      audioTracks.localAudioTrack.stopProcessAudioBuffer();
-      audioTracks.localAudioTrack.stop();
-      audioTracks.localAudioTrack.close();
-  
-      const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-      setAudioTracks(prevState => ({
-        ...prevState,
-        localAudioTrack: localAudioTrack
-      }));
-  
-      setAudioInputType('mic');
-    }
-  
-    const handleInputSwitchToAudioFile = async () => {
-      const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-        source: '/audiofiles/sample.flac'
-      });
-  
-      fileAudioTrack.startProcessAudioBuffer();
-  
-      audioTracks.localAudioTrack.stop();
-      audioTracks.localAudioTrack.close();
-  
-      setAudioTracks(prevState => ({
-        ...prevState,
-        localAudioTrack: fileAudioTrack
-      }));
-  
-      setAudioInputType('file');
-    }
-  
-    const handleAnswerWithAudioFile = async () => {
-      await rtcClient.join(config.appId, config.channel, config.token, clientID);
-  
-      const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-        source: '/audiofiles/fake_sample.mp3'
-      });
-  
-      fileAudioTrack.startProcessAudioBuffer();
-  
-      setAudioTracks(prevState => ({
-        ...prevState,
-        localAudioTrack: fileAudioTrack
-      }));
+  const handleLogout = () => {
+    webSocket.close();
+    setClientID(null);
+  };
 
-      setAudioInputType('file');
-      setStatus('Incall');
-      setModalIncallShow(true);
-    }
-
-    let endCall = async () => {
-      if (isRecording === true) {
-        alert('hello');
-        setIsRecording(false);
-      } else if (isRecording === false) {
-        alert('hey false');
-        setModalIncallShow(false);
-      }
-      setStatus('Ringing');
-    }
-  
-    const handleLogout = () => {
-      webSocket.close();
-      setWebSocket(null);
-    };
-
-    return (
-        <div 
-            class="row gy-3"
-            style={{textAlign: 'center'}}
-        >
-          <AdminIncallModal
-            show={modalIncallShow}
-            status={status}
-            onHide={() => setModalIncallShow(false)}
-            endCall={endCall}
-            audioInputType={audioInputType}
-            switchToMic={handleInputSwitchToMicrophone}
-            switchToFile={handleInputSwitchToAudioFile}
-          />
-          <div class="col-12 d-flex justify-content-center align-items-center">
-              <input 
-                  type="text" 
-                  id="inputField" 
-                  class="form-control mb-3" 
-                  style={{textAlign: 'center', borderColor: 'violet', borderWidth: '4px', borderStyle: 'solid', borderRadius: '30px'}} 
-                  placeholder="Enter A Number"
-              />
-          </div>
-          <div class="col-12 d-flex justify-content-center align-items-center">
-              <button 
-                  type="button" 
-                  class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
-                  style={{width: '85%', textAlign: 'center', clear: 'left'}}
-                  id="call-button"
-                  onClick={initRtc}
-              >
-                <span>Call</span>
-              </button>
-          </div>
-          <div class="col-12 d-flex justify-content-center align-items-center">
-              <button 
-                  type="button" 
-                  class="btn btn-primary btn-lg btn-group d-flex justify-content-center align-items-center" 
-                  style={{width: '85%', textAlign: 'center', clear: 'left'}}
-                  id="call-button"
-                  onClick={handleAnswerWithAudioFile}
-              >
-                <span>Answer With Audio File</span>
-              </button>
-          </div>
-          <div class="col-12 d-flex justify-content-center align-items-center">
-              <button 
-                  type="button" 
-                  class="btn btn-dark btn-lg btn-group d-flex justify-content-center align-items-center" 
-                  style={{width: '85%', textAlign: 'center', clear: 'left'}}
-                  id="call-button"
-                  onClick={handleLogout}
-              >
-                <span>Logout</span>
-              </button>
-          </div>
+  return (
+      <div 
+          class="row gy-3"
+          style={{textAlign: 'center'}}
+      >
+        <AdminIncallModal
+          show={adminCallState.modalIncallShow}
+          status={adminCallState.callStatus}
+          onHide={() => {
+            setAdminCallState(prevState => ({
+              ...prevState,
+              modalIncallShow: false
+            }))
+          }}
+          endCall={endCall}
+          audioInputType={adminCallState.audioInputType}
+          switchToMic={handleInputSwitchToMicrophone}
+          switchToFile={handleInputSwitchToAudioFile}
+        />
+        <div class="col-12 d-flex justify-content-center align-items-center">
+            <input 
+                type="text" 
+                id="inputField" 
+                class="form-control mb-3" 
+                style={{textAlign: 'center', borderColor: 'violet', borderWidth: '4px', borderStyle: 'solid', borderRadius: '30px'}} 
+                placeholder="Enter A Number"
+            />
         </div>
-    );
+        <div class="col-12 d-flex justify-content-center align-items-center">
+            <button 
+                type="button" 
+                class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
+                style={{width: '85%', textAlign: 'center', clear: 'left'}}
+                id="call-button"
+                onClick={initRtc}
+            >
+              <span>Call</span>
+            </button>
+        </div>
+        <div class="col-12 d-flex justify-content-center align-items-center">
+            <button 
+                type="button" 
+                class="btn btn-primary btn-lg btn-group d-flex justify-content-center align-items-center" 
+                style={{width: '85%', textAlign: 'center', clear: 'left'}}
+                id="call-button"
+                onClick={handleAnswerWithAudioFile}
+            >
+              <span>Answer With Audio File</span>
+            </button>
+        </div>
+        <div class="col-12 d-flex justify-content-center align-items-center">
+            <button 
+                type="button" 
+                class="btn btn-dark btn-lg btn-group d-flex justify-content-center align-items-center" 
+                style={{width: '85%', textAlign: 'center', clear: 'left'}}
+                id="call-button"
+                onClick={handleLogout}
+            >
+              <span>Logout</span>
+            </button>
+        </div>
+      </div>
+  );
 };
 
 export default AdminCall;

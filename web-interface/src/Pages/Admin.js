@@ -25,6 +25,10 @@ const Admin = () => {
           console.error('Error connecting WebSocket:', error);
       }
     }
+
+    if (clientID === null) {
+      setWebSocket(null)
+    }
   }, [clientID]);
 
   useEffect(() => {
@@ -36,7 +40,7 @@ const Admin = () => {
   return (
     <div class="container d-flex justify-content-center align-items-center" style={{width: '100%', height: '100%'}}>
       {renderCallScreen === false && <Gate setClientID={setClientID}/>}
-      {renderCallScreen === true && <AdminCall clientID={clientID} webSocket={webSocket} setWebSocket={setWebSocket}/>}
+      {renderCallScreen === true && <AdminCall clientID={clientID} webSocket={webSocket} setClientID={setClientID}/>}
     </div>
   );
 };

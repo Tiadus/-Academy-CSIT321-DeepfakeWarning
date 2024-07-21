@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect} from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 const config = require('../app-config')
 
-const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
+const ClientCall = ({clientID, webSocket}) => {
+  const [incall, setIncall] = useState(false);
+  const [status, setStatus] = useState('Ringing');
   const [isRecording, setIsRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const [stream, setStream] = useState(null);
@@ -12,8 +14,7 @@ const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
     localAudioTrack: null,
     remoteAudioTracks: []
   });
-  const [audioInputType, setAudioInputType] = useState('mic'); //file
-
+  
   useEffect(() => {
     const startRecording = () => {
       if (intervalID === null) {
@@ -51,14 +52,18 @@ const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
         
         rtcClient.unpublish();
         rtcClient.leave();
+
+        if(window.ReactNativeWebView) { //Ensure window.ReactNativeWebView is there to prevent crashing
+          window.ReactNativeWebView.postMessage('End Call');
+        }
       }
     }
-
-    if (isRecording === true) {
-      startRecording();
-    }
-  }, [isRecording]);
-
+  
+      if (isRecording === true) {
+        startRecording();
+      }
+    }, [isRecording]);
+  
   const recordAudioStream = (audioTrack) => {
     const mediaRecorder = new MediaRecorder(new MediaStream([audioTrack]));
 
@@ -77,7 +82,7 @@ const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
     setIsRecording(true);
     setMediaRecorder(mediaRecorder);
   };
-
+  
   useEffect(() => {
     if (rtcClient === null) {
       const rtcClient = AgoraRTC.createClient({mode:'rtc', codec:'vp8'});
@@ -87,7 +92,6 @@ const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
       }
     
       const handleUserPublished = async (user, mediaType) => {
-        alert('user publish');
         await rtcClient.subscribe(user, mediaType);
     
         if (mediaType === 'audio') {
@@ -100,6 +104,7 @@ const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
           }));
 
           user.audioTrack.play();
+          setStatus('Incall')
           recordAudioStream(user.audioTrack.mediaStreamTrack);
         }
       }
@@ -117,7 +122,7 @@ const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
       setRtcClient(rtcClient);
     }
   }, []);
-
+  
   useEffect(() => {
     if (audioTracks.localAudioTrack !== null) {
       rtcClient.publish(audioTracks.localAudioTrack);
@@ -125,99 +130,55 @@ const VoiceCall = ({clientID, webSocket, setWebSocket}) => {
   }, [audioTracks.localAudioTrack]);
 
   let initRtc = async () => {
-    //alert(navigator.mediaDevices)
-    await rtcClient.join(config.appId, config.channel, config.token, clientID);
+    try {
+      await rtcClient.join(config.appId, config.channel, config.token, clientID);
+      setIncall(true);
+    } catch(error) {
+      alert('Error In Joining!');
+    }
 
-    //const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+    //Option To Get The Client Microphone When Communicating Through HTTPS
+    /*const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
     setAudioTracks(prevState => ({
       ...prevState,
-      localAudioTrack: localAudioTrack
-    }));
+      localAudioTrack: stream
+    }));*/
   }
 
-  let leaveRoom = async () => {
-    setIsRecording(false);
-  }
-
-  const handleInputSwitchToAudioFile = async () => {
-    const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-      source: '/audiofiles/sample.flac'
-    });
-
-    fileAudioTrack.startProcessAudioBuffer();
-
-    audioTracks.localAudioTrack.stop();
-    audioTracks.localAudioTrack.close();
-
-    setAudioTracks(prevState => ({
-      ...prevState,
-      localAudioTrack: fileAudioTrack
-    }));
-
-    setAudioInputType('file');
-  }
-
-  const handleInputSwitchToMicrophone = async () => {
-    audioTracks.localAudioTrack.stopProcessAudioBuffer();
-    audioTracks.localAudioTrack.stop();
-    audioTracks.localAudioTrack.close();
-
-    const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-    setAudioTracks(prevState => ({
-      ...prevState,
-      localAudioTrack: localAudioTrack
-    }));
-
-    setAudioInputType('mic');
-  }
-
-  const handleAnswerWithAudioFile = async () => {
-    await rtcClient.join(config.appId, config.channel, config.token, clientID);
-
-    const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-      source: '/audiofiles/fake_sample.mp3'
-    });
-
-    fileAudioTrack.startProcessAudioBuffer();
-
-    setAudioTracks(prevState => ({
-      ...prevState,
-      localAudioTrack: fileAudioTrack
-    }));
-  }
-
-  const handleLogout = () => {
-    webSocket.close();
-    setWebSocket(null);
+  const endCall = () => {
+      if (isRecording === true) {
+          setIsRecording(false);
+      } else if (isRecording === false) {
+          if(window.ReactNativeWebView) { //Ensure window.ReactNativeWebView is there to prevent crashing
+              window.ReactNativeWebView.postMessage('End Call');
+          }
+      }
   };
 
   return (
     <div>
+      {incall === false &&
+        <button 
+          class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
+          onClick={initRtc}
+        >
+          Call
+        </button>
+      }
+      {incall === true && 
         <div>
-            <button onClick={initRtc} disabled={isRecording}>Initial Call</button>
+          <div style={{textAlign: "center"}}>
+            {status}
+          </div>
+          <button class="btn btn-danger btn-lg btn-group d-flex justify-content-center align-items-center" 
+            onClick={endCall}
+          >
+            End Call
+          </button>
         </div>
-        <div>
-            <button onClick={leaveRoom} disabled={!isRecording}>Hangup Call</button>
-        </div>
-        <br/>
-        <div>
-          <button onClick={handleInputSwitchToAudioFile} disabled={!isRecording || audioInputType === 'file'}>Switch Input To Audio File</button>
-        </div>
-        <div>
-          <button onClick={handleInputSwitchToMicrophone} disabled={!isRecording || audioInputType === 'mic'}>Switch Input To Microphone</button>
-        </div>
-        <br/>
-        <div>
-          <button onClick={handleAnswerWithAudioFile} disabled={isRecording}>Answer Call With Audio File</button>
-        </div>
-        <br/>
-        <div>
-            <button onClick={handleLogout} disabled={isRecording}>Logout</button>
-        </div>
+      }
     </div>
   );
 };
 
-export default VoiceCall;
+export default ClientCall;

@@ -1,41 +1,18 @@
 import './App.css';
-import Gate from './Pages/Gate';
-import Home from './Pages/Home';
-import { useState, useEffect } from 'react';
-
-const app_config = require('./app-config.js');
+import Admin from './Pages/Admin';
+import Client from './Pages/Client';
+import Test from './Pages/Test';
+import { Routes, Route } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
-  const [clientID, setClientID] = useState(null);
-  const [webSocket, setWebSocket] = useState(null);
-
-  useEffect(() => {
-    if (clientID !== null) {
-      try {
-        const ws = new WebSocket(app_config.server_main_ws);
-        ws.onopen = () => {
-          ws.send(clientID);
-        };
-        ws.onmessage = (message) => {
-          console.log(message.data);
-        }
-        setWebSocket(ws);
-      } catch (error) {
-          console.error('Error connecting WebSocket:', error);
-      }
-    }
-  }, [clientID]);
-
-  useEffect(() => {
-    if (webSocket === null) {
-      setClientID(null);
-    }
-  }, [webSocket])
-
   return (
-    <div className="App">
-      {webSocket === null && <Gate setClientID={setClientID}/>}
-      {webSocket !== null && <Home clientID={clientID} webSocket={webSocket} setWebSocket={setWebSocket} appid={app_config.appid}/>}
+    <div style={{height: "100vh", width: "100vw"}}>
+      <Routes>
+        <Route index element={<Admin/>} />
+        <Route path='client' element={<Client/>} />
+        <Route path='test' element={<Test/>} />
+      </Routes>
     </div>
   );
 }

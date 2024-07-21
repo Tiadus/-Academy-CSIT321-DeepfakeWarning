@@ -25,6 +25,16 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 const { Readable } = require('stream');
 
+app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
+
+// Serve static files from the 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Define a route to serve the HTML file
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 const getServerTime = () => {
   // Get the current date and time
   const currentDate = new Date();
@@ -59,14 +69,14 @@ async function saveAudioRecordToFile(message, clientID) {
   const fileName = `C${clientID}T${serverTime.year}${serverTime.month}${serverTime.day}${serverTime.hour}${serverTime.minute}${serverTime.second}.flac`;
   const filePath = path.join(__dirname, 'audio_files', fileName); // __dirname gives the directory of the current module
 
-  await ffmpeg(audioStream)
+  ffmpeg(audioStream)
   .audioChannels(1)
   .outputFormat('flac')
   .on('error', (err) => {
       console.error('Error during conversion:', err);
   })
   .on('end', () => {
-
+    console.log('Conversion Complete')
   }).save(filePath);
   
   return fileName;
@@ -109,8 +119,12 @@ async function runModel(clientID, fileName) {
 };
 
 async function analyse(clientID, message) {
-  const fileName = await saveAudioRecordToFile(message, clientID);
-  await runModel(clientID, fileName);
+  let processedID = clientID;
+  if (processedID < 0) {
+    processedID *= -1;
+  }
+  const fileName = await saveAudioRecordToFile(message, processedID);
+  await runModel(processedID, fileName);
 }
 
 const clients = [];

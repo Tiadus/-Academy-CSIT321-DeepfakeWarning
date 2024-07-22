@@ -56,10 +56,6 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
 
       let handleUserLeft = async (user) => {
         try{
-          if (adminCallState.mediaRecorder) {
-            adminCallState.mediaRecorder.stop();
-          }
-
           setAdminCallState(prevState => ({
             ...prevState,
             remoteAudioTrack: null,
@@ -76,13 +72,13 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
 
       setRtcClient(rtcClient);
     }
-  }, [rtcClient, webSocket, adminCallState.mediaRecorder]); //NOTE []
+  }, []); //NOTE []
 
   useEffect(() => {
     if (adminCallState.localAudioTrack !== null) {
       rtcClient.publish(adminCallState.localAudioTrack);
     }
-  }, [adminCallState.localAudioTrack, rtcClient]); //NOTE adminCallState.localAudioTrack
+  }, [adminCallState.localAudioTrack]); //NOTE adminCallState.localAudioTrack
 
   useEffect(() => {
     if (adminCallState.mediaRecorder !== null && adminCallState.mediaRecorder.state === 'inactive') {
@@ -99,6 +95,7 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
 
     if (adminCallState.mediaRecorder === null) {
       if (adminCallState.interval !== null) {
+        alert('Line 98');
         clearInterval(adminCallState.interval);
         setAdminCallState(prevState => ({
           ...prevState,
@@ -106,7 +103,7 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
         }));
       }
     }
-  }, [adminCallState.mediaRecorder, adminCallState.interval]); //NOTE adminCallState.mediaRecorder
+  }, [adminCallState.mediaRecorder]); //NOTE adminCallState.mediaRecorder
 
   useEffect(() => {
     if (adminCallState.modalIncallShow === false) {
@@ -141,9 +138,7 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
         }
       }
     }
-  }, [adminCallState.modalIncallShow, adminCallState.localAudioTrack, 
-      adminCallState.remoteAudioTrack, adminCallState.audioInputType,
-      rtcClient, adminCallState.mediaRecorder, adminCallState.interval]) //NOTE adminCallState.modalIncallShow
+  }, [adminCallState.modalIncallShow]) //NOTE adminCallState.modalIncallShow
 
   let initRtc = async () => {
     await rtcClient.join(config.appId, config.channel, config.token, clientID);
@@ -152,8 +147,9 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
 
     setAdminCallState(prevState => ({
       ...prevState,
+      modalIncallShow: true,
       localAudioTrack: localAudioTrack,
-      modalIncallShow: true
+      audioInputType: 'mic'
     }))
   }
 

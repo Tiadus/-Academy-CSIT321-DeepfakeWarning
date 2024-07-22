@@ -36,9 +36,7 @@ export default function Incall() {
     }
   };
 
-  return (
-    <SafeAreaView style={{flex: 1}}>
-      <WebView
+  /*      <WebView
         ref={webViewRef}
         source={{uri: 'http://192.168.56.1:3000/client'}}
         onLoad={()=>{
@@ -51,6 +49,10 @@ export default function Incall() {
         onError={handleWebViewError}
         onHttpError={handleHttpError}
       />
+  */
+
+  return (
+    <SafeAreaView style={{flex: 1}}>
     </SafeAreaView>
   );
 };

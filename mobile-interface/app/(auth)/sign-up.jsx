@@ -10,7 +10,7 @@ export default function Signup() {
   const [userPassword, onChangeUserPassword] = useState('');
   const [userConfirmPassword, onChangeUserConfirmPassword] = useState('');
   return (
-    <View className="items-center">
+    <View className="items-center bg-white h-full">
       <Image
         source={images.logo}
         className="w-[110px] h-[110px] mb-10 mt-20"

@@ -7,6 +7,11 @@ const GlobalProvider = ({ children }) => {
   const [config, setConfig] = useState(require('./app-config'));
   const [user, setUser] = useState(null);
   const [webSocket, setWebSocket] = useState(null);
+  const [focusContact, setFocusContact] = useState({
+    id: '0',
+    name: 'Rem',
+    initial: 'R'
+  })
 
   return (
     <GlobalContext.Provider
@@ -16,6 +21,8 @@ const GlobalProvider = ({ children }) => {
         setUser,
         webSocket,
         setWebSocket,
+        focusContact,
+        setFocusContact
       }}
     >
       {children}

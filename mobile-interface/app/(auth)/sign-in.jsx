@@ -5,6 +5,8 @@ import { useGlobalContext } from "../../context/GlobalStatus";
 
 import { images } from "../../constants";
 
+import axios from 'axios'
+
 export default function Signin() {
   const {config, user, setUser, setWebSocket} = useGlobalContext();
   const [userEmail, onChangeUserEmail] = useState('');
@@ -42,13 +44,21 @@ export default function Signin() {
   
   const handleLogin = async () => {
     //router.replace('/home');
-    /*setUser({
+    setUser({
       clientID: '2'
-    })*/
+    })
+
+    /*try{
+      const result = await axios.get('http://localhost:4000/api/login');
+      console.log(result.data);
+      router.replace('/home');
+    } catch(error) {
+      console.log(error);
+    }*/
   }
 
   return (
-    <View className="items-center">
+    <View className="items-center bg-white h-full">
       <Image
         source={images.logo}
         className="w-[110px] h-[110px] mb-10 mt-20"
@@ -75,6 +85,7 @@ export default function Signin() {
       <TouchableOpacity
         className="rounded-xl w-10/12 items-center justify-center h-12 mb-8"
         style={{backgroundColor: '#343434'}}
+        onPress={handleLogin}
       >
         <Text className="text-white">SIGN IN</Text>
       </TouchableOpacity>

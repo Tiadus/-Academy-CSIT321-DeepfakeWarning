@@ -1,7 +1,7 @@
 import {View, Text, Button, Image, TouchableOpacity} from 'react-native';
 import { router } from "expo-router";
-import { useGlobalContext } from "../../../context/GlobalStatus";
-import { images } from "../../../constants";
+import { useGlobalContext } from "../context/GlobalStatus";
+import { images } from "../constants";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function Info() {

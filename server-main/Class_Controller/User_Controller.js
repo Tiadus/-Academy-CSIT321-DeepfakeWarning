@@ -108,14 +108,14 @@ class User_Controller {
 
             for (let i = 0; i < incomingCallHistory.length; i++) {
                 incomingCallHistory[i].call_date = serviceTime.convertDate(incomingCallHistory[i].call_date);
-                if (incomingCallHistory[i].deepfake === true) {
+                if (incomingCallHistory[i].deepfake == true) {
                     deepfakeCallQuantity += 1;
                 }
             }
 
             for (let i = 0; i < outgoingCallHistory.length; i++) {
                 outgoingCallHistory[i].call_date = serviceTime.convertDate(outgoingCallHistory[i].call_date);
-                if (outgoingCallHistory[i].deepfake === true) {
+                if (outgoingCallHistory[i].deepfake == true) {
                     deepfakeCallQuantity += 1;
                 }
             }

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS CONTACT (
     stored_id int not null,
     blocked boolean not null,
     constraint CONTACT_PK primary key (contact_id),
+    constraint CONTACT_CK1 unique(storer_id, stored_id),
     constraint CONTACT_FK1 foreign key (storer_id) references APP_USER(user_id),
     constraint CONTACT_FK2 foreign key (stored_id) references APP_USER(user_id)
 );
@@ -21,6 +22,7 @@ CREATE TABLE IF NOT EXISTS CALL_HISTORY (
     history_id int auto_increment not null,
 	sender int not null,
     receiver int not null,
+    call_date date not null,
     call_status varchar(255) not null,
     deepfake boolean not null,
     constraint CALL_HISTORY_PK primary key (history_id),

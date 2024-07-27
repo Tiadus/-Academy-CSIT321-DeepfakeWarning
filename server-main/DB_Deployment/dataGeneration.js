@@ -87,6 +87,16 @@ function getServerCallTime() {
 function generateCallHistory() {
     const historyList = [];
 
+    const timeInfo = getServerCallTime();
+    const year = timeInfo[0];
+    const month = timeInfo[1];
+    const date = timeInfo[2];
+    const hour = timeInfo[3];
+    const minute = timeInfo[4];
+    const second = parseInt(timeInfo[5]);
+
+    const callDate = `${year}-${month}-${date}`;
+
     for (let i = 1; i <=5; i++) {
         const sender = 15;
         const receiver = i;
@@ -96,6 +106,7 @@ function generateCallHistory() {
         const aHistory = {
             sender: sender,
             receiver: receiver,
+            callDate: callDate,
             status: status,
             deepfake: deepfake
         }
@@ -103,7 +114,7 @@ function generateCallHistory() {
         historyList.push(aHistory);
     }
 
-    for (let i = 1; i <=5; i++) {
+    for (let i = 6; i <= 10; i++) {
         const sender = i;
         const receiver = 15;
         const status = getRandomInt(0,2);
@@ -112,6 +123,7 @@ function generateCallHistory() {
         const aHistory = {
             sender: sender,
             receiver: receiver,
+            callDate: callDate,
             status: status,
             deepfake: deepfake
         }

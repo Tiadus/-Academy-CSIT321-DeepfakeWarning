@@ -65,7 +65,7 @@ async function batchCallHistory(dbConnection, historyList) {
 
         // Prepare the insert query
         const queryCallHistory = 
-        'INSERT INTO CALL_HISTORY (sender, receiver, call_status, deepfake) VALUES ?';
+        'INSERT INTO CALL_HISTORY (sender, receiver, call_date, call_status, deepfake) VALUES ?';
 
         // Format the data for batch insert
         const valueCallHistory = 
@@ -73,6 +73,7 @@ async function batchCallHistory(dbConnection, historyList) {
             [
                 item.sender,
                 item.receiver,
+                item.callDate,
                 item.status,
                 item.deepfake,
             ]);

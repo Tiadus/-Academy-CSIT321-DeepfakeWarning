@@ -25,14 +25,335 @@ const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 const { Readable } = require('stream');
 
-app.use('/node_modules', express.static(path.join(__dirname, 'node_modules')));
+const User_Controller = require('./Class_Controller/User_Controller.js');
+const Education_Controller = require('./Class_Controller/Education_Controller.js');
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Define a route to serve the HTML file
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+app.post('/api/register', async (req,res) => {
+  const body = req.body;
+  const email = body.email;
+  const user_name = body.user_name;
+  const phone = body.phone;
+  const user_password = body.user_password;
+
+  if (email === undefined || user_name === undefined || phone === undefined || user_password === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      const newUserID = await userController.registerUser(email, user_name, 'default.jpg', phone, user_password);
+      res.json({newUserID: newUserID});
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
+});
+
+app.post('/api/login', async (req,res) => {
+  const authen = req.headers.authorization;
+  if (authen === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  const encodedCredential = authen.split(" ")[1];
+  const decodedCredential = atob(encodedCredential);
+
+  const authenParts = decodedCredential.split(":");
+  const userEmail = authenParts[0];
+  const userPassword = authenParts[1];
+
+  if (userEmail === undefined || userPassword === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      await userController.authenticateUser(userEmail, userPassword);
+
+      res.json({
+        user_id: userController.user.userID,
+        email: userController.user.email,
+        userName: userController.user.user_name,
+        avatar: userController.user.avatar,
+        phone: userController.user.phone
+      });
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
+});
+
+app.post('/api/profile', async (req, res) => {
+  const authen = req.headers.authorization;
+  if (authen === undefined) {
+      return res.send("Server Unavailable");
+  }
+
+  const encodedCredential = authen.split(" ")[1];
+  const decodedCredential = atob(encodedCredential);
+
+  const authenParts = decodedCredential.split(":");
+  const userEmail = authenParts[0];
+  const userPassword = authenParts[1];
+
+  const email = req.body.email;
+  const user_name = req.body.user_name;
+  const avatar = req.body.avatar;
+  const phone = req.body.phone;
+  const user_password = req.body.user_password;
+
+  if (email === undefined || user_name === undefined || avatar === undefined || phone === undefined || user_password === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      await userController.authenticateUser(userEmail, userPassword);
+      await userController.userEditProfile(email, user_name, avatar, phone, user_password);
+
+      res.status(200).send({ message: 'Profile Successfully Changed' });
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
+});
+
+app.get('/api/contact', async (req,res) => {
+  const authen = req.headers.authorization;
+  if (authen === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  const encodedCredential = authen.split(" ")[1];
+  const decodedCredential = atob(encodedCredential);
+
+  const authenParts = decodedCredential.split(":");
+  const userEmail = authenParts[0];
+  const userPassword = authenParts[1];
+
+  if (userEmail === undefined || userPassword === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      await userController.authenticateUser(userEmail, userPassword);
+
+      const contacts = await userController.getUserContacts();
+      res.json({contacts: contacts});
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
+});
+
+app.post('/api/contact', async (req,res) => {
+  const authen = req.headers.authorization;
+  if (authen === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  const encodedCredential = authen.split(" ")[1];
+  const decodedCredential = atob(encodedCredential);
+
+  const authenParts = decodedCredential.split(":");
+  const userEmail = authenParts[0];
+  const userPassword = authenParts[1];
+
+  if (userEmail === undefined || userPassword === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  const body = req.body;
+  const mode = body.mode;
+  const contact_id = body.contact_id;
+  const blockStatus = body.blockStatus;
+
+  if (mode === undefined || userPassword === contact_id) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  if (mode !== 'add' && mode !== 'del' && mode !== 'block') {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  if (isNaN(contact_id) === true) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      await userController.authenticateUser(userEmail, userPassword);
+
+      if (mode === 'add') {
+        const manageContactResult = await userController.userAddContact(parseInt(contact_id));
+        res.status(manageContactResult).send({ message: 'Contact Successfully Added' });
+      } else if (mode === 'block') {
+        if (blockStatus === undefined) {
+          const badRequestError = new Error('Bad Request');
+          badRequestError.status = 400;
+          res.status(badRequestError.status).json({error: badRequestError.message});
+        }
+
+        if (isNaN(blockStatus) === true) {
+          const badRequestError = new Error('Bad Request');
+          badRequestError.status = 400;
+          res.status(badRequestError.status).json({error: badRequestError.message});
+        }
+
+        const manageContactResult = await userController.userSetBlockStatus(blockStatus, parseInt(contact_id));
+        res.status(manageContactResult).send({ message: 'Block Status Successfully Changed' });
+      } else if (mode === 'del') {
+        const manageContactResult = await userController.userDeleteContact(parseInt(contact_id));
+        res.status(manageContactResult).send({ message: 'Contact Successfully Deleted' });
+      }
+
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
+});
+
+app.get('/api/block_status', async (req,res) => {
+  const authen = req.headers.authorization;
+  if (authen === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  const encodedCredential = authen.split(" ")[1];
+  const decodedCredential = atob(encodedCredential);
+
+  const authenParts = decodedCredential.split(":");
+  const userEmail = authenParts[0];
+  const userPassword = authenParts[1];
+
+  if (userEmail === undefined || userPassword === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  const receiver_id = req.query.id;
+  if (receiver_id === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  if (isNaN(receiver_id) === true) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      await userController.authenticateUser(userEmail, userPassword);
+
+      const isBlocked = await userController.checkReceiverBlockedStatus(parseInt(receiver_id));
+      res.json({isBlocked: isBlocked});
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
+});
+
+app.get('/api/statistic', async (req,res) => {
+  const authen = req.headers.authorization;
+  if (authen === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  const encodedCredential = authen.split(" ")[1];
+  const decodedCredential = atob(encodedCredential);
+
+  const authenParts = decodedCredential.split(":");
+  const userEmail = authenParts[0];
+  const userPassword = authenParts[1];
+
+  if (userEmail === undefined || userPassword === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      await userController.authenticateUser(userEmail, userPassword);
+
+      const statistic = await userController.getUserStatistic();
+      res.json({statistic: statistic});
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
+});
+
+app.get('/api/education', async (req,res) => {
+  const mode = req.query.mode;
+  const id = req.query.id;
+
+  if (mode === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  if (mode !== 'title' && mode !== 'content') {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const educationController = new Education_Controller();
+
+      if (mode === 'title') {
+        const titles = await educationController.getEducationalTitles();
+        res.json({titles: titles});
+      }
+
+      if (mode === 'content') {
+        if (id === undefined) {
+          const badRequestError = new Error('Bad Request');
+          badRequestError.status = 400;
+          res.status(badRequestError.status).json({error: badRequestError.message});
+        }
+
+        if (isNaN(id) === true) {
+          const badRequestError = new Error('Bad Request');
+          badRequestError.status = 400;
+          res.status(badRequestError.status).json({error: badRequestError.message});
+        }
+
+        const contents = await educationController.getEducationalContents(parseInt(id));
+        res.json({contents: contents});
+      }
+  } catch (error) {
+      res.status(error.status).json({error: error.message});
+  }
 });
 
 const getServerTime = () => {

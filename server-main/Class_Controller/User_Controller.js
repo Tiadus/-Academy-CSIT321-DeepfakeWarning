@@ -72,9 +72,29 @@ class User_Controller {
         }
     }
 
+    getInitial = (name) => {
+        const splitName = name.split(' ');
+        let initial = ''
+
+        if (splitName.length === 1) {
+            initial = splitName[0][0];
+            return initial.toUpperCase();
+        }
+
+        if (splitName.length > 1) {
+            initial = splitName[0][0] + splitName[splitName.length-1][0];
+            return (initial.toUpperCase());
+        }
+
+        return initial;
+    }
+
     async getUserContacts() {
         try {
             const contacts = await Contact.getStorerContacts(this.user.userID);
+            for (let i = 0; i < contacts.length; i++) {
+                contacts[i].initial = this.getInitial(contacts[i].user_name);
+            }
             return contacts;
         } catch (error) {
             throw error;
@@ -108,6 +128,7 @@ class User_Controller {
 
             for (let i = 0; i < incomingCallHistory.length; i++) {
                 incomingCallHistory[i].call_date = serviceTime.convertDate(incomingCallHistory[i].call_date);
+                incomingCallHistory[i].initial = this.getInitial(incomingCallHistory[i].user_name);
                 if (incomingCallHistory[i].deepfake == true) {
                     deepfakeCallQuantity += 1;
                 }
@@ -115,6 +136,7 @@ class User_Controller {
 
             for (let i = 0; i < outgoingCallHistory.length; i++) {
                 outgoingCallHistory[i].call_date = serviceTime.convertDate(outgoingCallHistory[i].call_date);
+                outgoingCallHistory[i].initial = this.getInitial(outgoingCallHistory[i].user_name);
                 if (outgoingCallHistory[i].deepfake == true) {
                     deepfakeCallQuantity += 1;
                 }

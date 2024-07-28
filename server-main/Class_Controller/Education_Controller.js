@@ -13,7 +13,7 @@ class Education_Controller {
     async getEducationalContents(education_id) {
         try {
             const educationCotents = await Education.getContent(education_id);
-            return educationCotents;
+            return educationCotents[0];
         } catch(error) {
             throw error;
         }

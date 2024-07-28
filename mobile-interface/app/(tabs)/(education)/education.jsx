@@ -2,8 +2,45 @@ import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from "expo-router";
+import { useEffect, useState } from 'react';
+import { useIsFocused } from "@react-navigation/native";
+import axios from 'axios';
+import EducationTitle from '../../../components/EducationTitle';
 
 export default function Education() {
+    const isFocused = useIsFocused();
+    useEffect(() => {
+        if (isFocused == true) {
+            retrieveEducationTitles();
+        }
+    }, [isFocused]);
+
+    const [titles, setTitles] = useState([]);
+
+    const retrieveEducationTitles = async () => {
+        try{
+            const titleRequestResult = await axios.get('http://localhost:4000/api/education?mode=title');
+            
+            setTitles(titleRequestResult.data.titles);
+            return;
+          } catch(error) {
+            let errorStatus = error.response.status;
+            let errorMessage = error.response.data.error;
+            if (errorStatus === 401) {
+              errorMessage = 'Invalid Credential'
+            }
+            Alert.alert(
+              'Warning',
+              errorMessage,
+              [
+                { text: 'OK' },
+              ],
+              { cancelable: false }
+            );
+            return;
+          }
+    }
+
     return (
         <View className='items-center h-full bg-white flex-col'>
             <View className='items-center justify-center mt-20 mb-4'>
@@ -24,79 +61,9 @@ export default function Education() {
                 <Text className='text-2xl text-fuchsia-800 font-extrabold'>Content</Text>
             </View>
             <ScrollView className= 'h-full w-10/12 flex-1'>
-                <TouchableOpacity
-                    className='flex-row mb-6'
-                    onPress={() => {
-                        router.navigate('content')
-                    }}
-                >
-                    <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                        <Text className='text-lg font-bold'>01</Text>
-                    </View>
-                    <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                        <Text numberOfLines={2} className='text-lg font-bold'>Understanding Audio Deepfakes: The New Frontier of Fraud</Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='flex-row mb-6'
-                >
-                    <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                        <Text className='text-lg font-bold'>02</Text>
-                    </View>
-                    <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                        <Text numberOfLines={2} className='text-lg font-bold'>Securing Social Media Accounts: A Comprehensive Guide</Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='flex-row mb-6'
-                >
-                    <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                        <Text className='text-lg font-bold'>03</Text>
-                    </View>
-                    <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                        <Text numberOfLines={2} className='text-lg font-bold'>Recognizing Fake Websites: A Guide to Staying Safe Online</Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='flex-row mb-6'
-                >
-                    <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                        <Text className='text-lg font-bold'>04</Text>
-                    </View>
-                    <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                        <Text numberOfLines={2} className='text-lg font-bold'>Safe Online Shopping Practices: A Comprehensive Guide</Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='flex-row mb-6'
-                >
-                    <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                        <Text className='text-lg font-bold'>05</Text>
-                    </View>
-                    <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                        <Text numberOfLines={2} className='text-lg font-bold'>Identifying phishing emails</Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='flex-row mb-6'
-                >
-                    <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                        <Text className='text-lg font-bold'>06</Text>
-                    </View>
-                    <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                        <Text numberOfLines={2} className='text-lg font-bold'>Reporting and Blocking Spam Emails and Messages</Text>
-                    </View>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    className='flex-row mb-6'
-                >
-                    <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                        <Text className='text-lg font-bold'>07</Text>
-                    </View>
-                    <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                        <Text numberOfLines={2} className='text-lg font-bold'>Understanding Privacy Settings</Text>
-                    </View>
-                </TouchableOpacity>
+                {titles.map((title) => (
+                    <EducationTitle key={title.education_id} education={title}></EducationTitle>
+                ))}
             </ScrollView>
         </View>
     )

@@ -15,11 +15,11 @@ export default function ContactInformation({contact}) {
             className='flex-row mb-4 border-b pb-2 border-gray-200'
             onPress={handleContactPress}
         >
-            <View className='border border-solid border-black rounded-full p-1'>
+            <View className='border border-solid border-black rounded-full p-1 w-9 items-center'>
                 <Text className='text-md'>{contact.initial}</Text>
             </View>
             <View className='ml-2'>
-                <Text className='text-lg'>{contact.name}</Text>
+                <Text className='text-lg'>{contact.user_name}</Text>
             </View>
         </TouchableOpacity>
     )

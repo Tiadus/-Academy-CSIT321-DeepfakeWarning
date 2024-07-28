@@ -1,30 +1,14 @@
 import {View, Text, ScrollView} from 'react-native';
 import ContactInformation from './ContactInfomation';
 
-export default function ContactList() {
-    const contact = {
-        id: '0',
-        initial: 'NN',
-        name: 'Nino Nakano',
-        phone: '0912341287'
-    }
-
+export default function ContactList({contacts}) {
     return(
         <View className='flex-row'>
-            <ScrollView>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-                <ContactInformation contact={contact}></ContactInformation>
-            </ScrollView>
+            {contacts !== undefined && <ScrollView>
+                {contacts.map((item) => (
+                    <ContactInformation key={item.user_id} contact={item}></ContactInformation>
+                ))}
+            </ScrollView>}
             <View>
                 <Text className="text-gray-500">a</Text>
                 <Text className="text-gray-500">b</Text>

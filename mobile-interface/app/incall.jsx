@@ -24,7 +24,7 @@ export default function Incall() {
 
   useEffect(() => {
     if (viewLoaded === true) {
-      const message = `${user.clientID}`
+      const message = `${user.user_id}`
       webViewRef.current.postMessage(message);
     }
   }, [viewLoaded])

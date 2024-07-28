@@ -12,6 +12,7 @@ const GlobalProvider = ({ children }) => {
     name: 'Rem',
     initial: 'R'
   })
+  const [focusContent, setFocusContent] = useState(1);
 
   return (
     <GlobalContext.Provider
@@ -22,7 +23,9 @@ const GlobalProvider = ({ children }) => {
         webSocket,
         setWebSocket,
         focusContact,
-        setFocusContact
+        setFocusContact,
+        focusContent,
+        setFocusContent
       }}
     >
       {children}

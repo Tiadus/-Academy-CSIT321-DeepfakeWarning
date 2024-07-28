@@ -15,7 +15,7 @@ export default function Info() {
             <View 
                 className='overflow-hidden rounded-full border-solid border-4 border-fuchsia-700 w-48 h-48 items-center mt-8 mb-12'>
                 <Image 
-                    source={images.nino} 
+                    source={{uri: ('http://localhost:4000/' + focusContact.avatar)}} 
                     className="w-[210px] h-[210px] mb-12 overflow-hidden rounded-full"
                 />
             </View>
@@ -23,14 +23,14 @@ export default function Info() {
                 <Text className="text-lg self-start mb-2 text-gray-400 font-bold">Full Name</Text>
                 <View className='flex-row'>
                     <Ionicons name='person-circle' style={{ fontSize: 30 }}/>
-                    <Text className="text-lg ml-2">{focusContact.name}</Text>
+                    <Text className="text-lg ml-2">{focusContact.user_name}</Text>
                 </View>
             </View>
             <View className="w-11/12 border-b pb-1 border-gray-400 mb-8">
                 <Text className="text-lg self-start mb-2 text-gray-400 font-bold">Phone Number</Text>
                 <View className='flex-row'>
                     <Ionicons name='call' style={{ fontSize: 30 }}/>
-                    <Text className="text-lg ml-2">{focusContact.id}</Text>
+                    <Text className="text-lg ml-2">{focusContact.user_id}</Text>
                 </View>
             </View>
             <View className="w-11/12 pb-1 border-gray-400 mb-4">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import {View, Text, TouchableOpacity, Image, TextInput} from 'react-native';
+import {View, Text, TouchableOpacity, Image, TextInput, Alert} from 'react-native';
 import { Link, router } from "expo-router";
 import { useGlobalContext } from "../../context/GlobalStatus";
 
@@ -20,7 +20,7 @@ export default function Signin() {
         socket.onopen = () => {
           console.log('WebSocket connection opened');
           router.replace('/home');
-          socket.send(user.clientID);
+          socket.send(user.user_id);
         };
         
         socket.onmessage = (event) => {
@@ -43,18 +43,50 @@ export default function Signin() {
   }, [user]);
   
   const handleLogin = async () => {
-    //router.replace('/home');
-    setUser({
-      clientID: '2'
-    })
+    if (userEmail === '' || userPassword === '') {
+      Alert.alert(
+        'Warning',
+        'Please Input All Credential',
+        [
+          { text: 'OK' },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
 
-    /*try{
-      const result = await axios.get('http://localhost:4000/api/login');
-      console.log(result.data);
-      router.replace('/home');
+    const encodedAuthentication = btoa(userEmail + ':' + userPassword);
+    const auth = `Basic ${encodedAuthentication}`
+
+    try{
+      const loginResult = await axios.post('http://localhost:4000/api/login', {}, {
+        headers: {
+          'Authorization': auth,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const user = loginResult.data;
+      user.user_id = loginResult.data.user_id.toString();
+      user.auth = auth;
+      
+      setUser(user);
     } catch(error) {
-      console.log(error);
-    }*/
+      let errorStatus = error.response.status;
+      let errorMessage = error.response.data.error;
+      if (errorStatus === 401) {
+        errorMessage = 'Invalid Credential'
+      }
+      Alert.alert(
+        'Warning',
+        errorMessage,
+        [
+          { text: 'OK' },
+        ],
+        { cancelable: false }
+      );
+      return;
+    }
   }
 
   return (
@@ -69,7 +101,7 @@ export default function Signin() {
         <TextInput
           className="border rounded-xl p-2 mb-2"
           placeholder="Enter Your Email/Phone Number"
-          onChange={onChangeUserEmail}
+          onChangeText={(value) => onChangeUserEmail(value)}
         />
       </View>
       <View className="w-10/12">
@@ -77,7 +109,7 @@ export default function Signin() {
         <TextInput
           className="border rounded-xl p-2 mb-2"
           placeholder="Enter Your Password"
-          onChange={onChangeUserPassword}
+          onChangeText={(value) => onChangeUserPassword(value)}
           secureTextEntry={true}
         />
         <Text className="self-end underline mb-8">Forgot Password?</Text>

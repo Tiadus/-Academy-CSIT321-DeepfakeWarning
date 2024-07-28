@@ -53,6 +53,18 @@ app.post('/api/register', async (req,res) => {
   }
 });
 
+const decodeCredential = (encodedCredential) => {
+  try {
+    const decodedCredential = atob(encodedCredential);
+    return decodedCredential;
+  } catch(error) {
+    console.log(error);
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 409;
+    throw badRequestError;
+  }
+}
+
 app.post('/api/login', async (req,res) => {
   const authen = req.headers.authorization;
   if (authen === undefined) {
@@ -61,30 +73,30 @@ app.post('/api/login', async (req,res) => {
     res.status(badRequestError.status).json({error: badRequestError.message});
   }
 
-  const encodedCredential = authen.split(" ")[1];
-  const decodedCredential = atob(encodedCredential);
-
-  const authenParts = decodedCredential.split(":");
-  const userEmail = authenParts[0];
-  const userPassword = authenParts[1];
-
-  if (userEmail === undefined || userPassword === undefined) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
   try {
-      const userController = new User_Controller();
-      await userController.authenticateUser(userEmail, userPassword);
+    const encodedCredential = authen.split(" ")[1];
+    const decodedCredential = decodeCredential(encodedCredential);
 
-      res.json({
-        user_id: userController.user.userID,
-        email: userController.user.email,
-        userName: userController.user.user_name,
-        avatar: userController.user.avatar,
-        phone: userController.user.phone
-      });
+    const authenParts = decodedCredential.split(":");
+    const userEmail = authenParts[0];
+    const userPassword = authenParts[1];
+
+    if (userEmail === undefined || userPassword === undefined) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+
+    const userController = new User_Controller();
+    await userController.authenticateUser(userEmail, userPassword);
+
+    res.json({
+      user_id: userController.user.userID,
+      email: userController.user.email,
+      user_name: userController.user.user_name,
+      avatar: userController.user.avatar,
+      phone: userController.user.phone
+    });
   } catch (error) {
       res.status(error.status).json({error: error.message});
   }
@@ -349,7 +361,7 @@ app.get('/api/education', async (req,res) => {
         }
 
         const contents = await educationController.getEducationalContents(parseInt(id));
-        res.json({contents: contents});
+        res.json({contentBody: contents});
       }
   } catch (error) {
       res.status(error.status).json({error: error.message});
@@ -397,7 +409,7 @@ async function saveAudioRecordToFile(message, clientID) {
       console.error('Error during conversion:', err);
   })
   .on('end', () => {
-    console.log('Conversion Complete')
+    console.log('Conversion Complete - File Name: ' + fileName);
   }).save(filePath);
   
   return fileName;
@@ -423,7 +435,7 @@ async function runModel(clientID, fileName) {
 
       const evaluatedScore = parseFloat(stdout);
 
-      if (parseFloat(evaluatedScore) > -2.9) {
+      if (parseFloat(evaluatedScore) > 1.5) {
         console.log(`File ${fileName} is suspected of deepfake with score = ${parseFloat(evaluatedScore)}`);
     
         try{

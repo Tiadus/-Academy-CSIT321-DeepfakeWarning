@@ -72,20 +72,24 @@ export default function Signin() {
       
       setUser(user);
     } catch(error) {
-      let errorStatus = error.response.status;
-      let errorMessage = error.response.data.error;
-      if (errorStatus === 401) {
-        errorMessage = 'Invalid Credential'
+      if (error.response && error.response.status) {
+        let errorStatus = error.response.status;
+        let errorMessage = error.response.data.error;
+        if (errorStatus === 401) {
+          errorMessage = 'Invalid Credential'
+        }
+        Alert.alert(
+          'Warning',
+          errorMessage,
+          [
+            { text: 'OK' },
+          ],
+          { cancelable: false }
+        );
+        return;
+      } else {
+        console.log(error);
       }
-      Alert.alert(
-        'Warning',
-        errorMessage,
-        [
-          { text: 'OK' },
-        ],
-        { cancelable: false }
-      );
-      return;
     }
   }
 

@@ -13,8 +13,8 @@ class Contact {
             connection = await pool.getConnection();
             await connection.beginTransaction();
 
-            const sqlRegisterContact = 'INSERT INTO CONTACT (storer_id, stored_id, blocked) VALUES(?, ?, ?)';
-            const sqlRegisterContactValue = [storer_id, stored_id, false];
+            const sqlRegisterContact = 'INSERT INTO CONTACT (storer_id, stored_id) VALUES(?, ?)';
+            const sqlRegisterContactValue = [storer_id, stored_id];
             const contactRegisterResult = await connection.query(sqlRegisterContact, sqlRegisterContactValue);
             
             connection.commit();
@@ -40,30 +40,6 @@ class Contact {
             if (connection !== null) {
                 connection.release();
             }
-        }
-    }
-
-    static async setBlockStatus(blocked, storer_id, stored_id) {
-        const {pool} = require('../Database.js');
-        try {
-            const sql = 'UPDATE CONTACT SET blocked = ? WHERE storer_id = ? AND stored_id = ?';
-            const sqlValue = [blocked, storer_id, stored_id];
-
-            const updateResult = await pool.query(sql, sqlValue);
-
-            if (updateResult[0].affectedRows === 0) {
-                const error = new Error("Forbidden");
-                error.status = 403;
-                return Promise.reject(error);
-            }
-
-            return 200;
-        }
-        catch(dbError) {
-            console.log("Error When Updating Contact Block Status: " + dbError);
-            const error = new Error("Internal Server Error");
-            error.status = 500;
-            throw error;
         }
     }
 

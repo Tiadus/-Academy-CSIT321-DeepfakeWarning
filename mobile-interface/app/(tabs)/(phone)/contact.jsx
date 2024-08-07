@@ -6,7 +6,7 @@ import ContactList from '../../../components/ContactList'
 import { useEffect, useState } from 'react';
 import { useIsFocused } from "@react-navigation/native";
 import { useGlobalContext } from "../../../context/GlobalStatus";
-import axios from 'axios'
+import axios from 'axios';
 
 export default function Contact() {
     const {user} = useGlobalContext();

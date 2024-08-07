@@ -51,7 +51,7 @@ export default function Setting() {
           <View className="bg-[#D9D9D9] w-full rounded-3xl p-1 overflow-hidden">
             <SettingsButton icon={'person-outline'} borderOption={'border-b border-slate-400'} buttonName={'Edit Profile'} handleClick={() => {console.log('Profile')}}/>
             <SettingsButton icon={'notifications-outline'} borderOption={'border-b border-slate-400'} buttonName={'Accessibility Features'} handleClick={() => {return;}}/>
-            <SettingsButton icon={'volume-medium-outline'} borderOption={'border-b border-slate-400'} buttonName={'Delete Account'} handleClick={() => {return;}}/>
+            <SettingsButton icon={'volume-medium-outline'} borderOption={'border-b border-slate-400'} buttonName={'Notification'} handleClick={() => {return;}}/>
             <SettingsButton icon={'trash-outline'} borderOption={'border-b border-slate-400'} buttonName={'Delete Account'} handleClick={() => {return;}}/>
             <SettingsButton icon={'power-outline'} borderOption={''} buttonName={'Log Out'} handleClick={() => {handleLogout()}}/>
           </View>
@@ -59,7 +59,7 @@ export default function Setting() {
           <View className="bg-[#D9D9D9] w-full rounded-3xl p-1 overflow-hidden">
             <SettingsButton icon={'mail-outline'} borderOption={'border-b border-slate-400'} buttonName={'Contact Us'} handleClick={() => {return;}}/>
             <SettingsButton icon={'alert-circle-outline'} borderOption={'border-b border-slate-400'} buttonName={'About Us'} handleClick={() => {return;}}/>
-            <SettingsButton icon={'help-outline'} borderOption={'border-b border-slate-400'} buttonName={'Help Center'} handleClick={() => {return;}}/>
+            <SettingsButton icon={'help-circle-outline'} borderOption={'border-b border-slate-400'} buttonName={'Help Center'} handleClick={() => {return;}}/>
             <SettingsButton icon={'document-text-outline'} borderOption={'border-b border-slate-400'} buttonName={'Terms of Service'} handleClick={() => {return;}}/>
             <SettingsButton icon={'document-lock-outline'} borderOption={''} buttonName={'Privacy Policy'} handleClick={() => {return;}}/>
           </View>

@@ -14,8 +14,8 @@ class User {
             connection = await pool.getConnection();
             await connection.beginTransaction();
 
-            const sqlRegisterUser = 'INSERT INTO APP_USER (email, user_name, avatar, phone, user_password) VALUES(?, ?, ?, ?, ?)';
-            const sqlRegisterUserValue = [email, user_name, avatar, phone, user_password];
+            const sqlRegisterUser = 'INSERT INTO APP_USER (email, user_name, avatar, phone, user_password, modified_by) VALUES(?, ?, ?, ?, ?, ?)';
+            const sqlRegisterUserValue = [email, user_name, avatar, phone, user_password, 0];
             const userRegisterResult = await connection.query(sqlRegisterUser, sqlRegisterUserValue);
             
             connection.commit();
@@ -26,7 +26,6 @@ class User {
             if (connection !== null) {
                 connection.rollback();
             }
-
             if (dbError.code !== undefined && dbError.code === 'ER_DUP_ENTRY') {
                 const error = new Error("User Already Exist");
                 error.status = 409;
@@ -71,8 +70,8 @@ class User {
     async setProfile(email, user_name, avatar, phone, user_password) {
         const {pool} = require('../Database.js');
         try {
-            const sql = 'UPDATE APP_USER SET email = ?, user_name = ?, avatar = ?, phone = ?, user_password = ? WHERE user_id = ?';
-            const sqlValue = [email, user_name, avatar, phone, user_password, this.userID];
+            const sql = 'UPDATE APP_USER SET email = ?, user_name = ?, avatar = ?, phone = ?, user_password = ?, modified_by = ? WHERE user_id = ?';
+            const sqlValue = [email, user_name, avatar, phone, user_password, this.userID, this.userID];
 
             const updateResult = await pool.query(sql, sqlValue);
 
@@ -86,78 +85,6 @@ class User {
         }
         catch(dbError) {
             console.log("Error When Updating User Profile: " + dbError);
-            const error = new Error("Internal Server Error");
-            error.status = 500;
-            throw error;
-        }
-    }
-
-    async setName(newName) {
-        const {pool} = require('../Database.js');
-        try {
-            const sql = 'UPDATE APP_USER SET user_name = ? WHERE user_id = ?';
-            const sqlValue = [newName, this.userID];
-
-            const updateResult = await pool.query(sql, sqlValue);
-
-            if (updateResult[0].affectedRows === 0) {
-                const error = new Error("Forbidden");
-                error.status = 403;
-                return Promise.reject(error);
-            }
-
-            return 200;
-        }
-        catch(dbError) {
-            console.log("Error When Updating Customer Name: " + dbError);
-            const error = new Error("Internal Server Error");
-            error.status = 500;
-            throw error;
-        }
-    }
-
-    async setPhone(newPhone) {
-        const {pool} = require('../Database.js');
-        try {
-            const sql = 'UPDATE APP_USER SET phone = ? WHERE user_id = ?';
-            const sqlValue = [newPhone, this.userID];
-
-            const updateResult = await pool.query(sql, sqlValue);
-
-            if (updateResult[0].affectedRows === 0) {
-                const error = new Error("Forbidden");
-                error.status = 403;
-                return Promise.reject(error);
-            }
-
-            return 200;
-        }
-        catch(dbError) {
-            console.log("Error When Updating User Phone: " + dbError);
-            const error = new Error("Internal Server Error");
-            error.status = 500;
-            throw error;
-        }
-    }
-
-    async setPassword(newPassword) {
-        const {pool} = require('../Database.js');
-        try {
-            const sql = 'UPDATE APP_USER SET customerPassword = ? WHERE user_id = ?';
-            const sqlValue = [newPassword, this.userID];
-
-            const updateResult = await pool.query(sql, sqlValue);
-
-            if (updateResult[0].affectedRows === 0) {
-                const error = new Error("Forbidden");
-                error.status = 403;
-                return Promise.reject(error);
-            }
-
-            return 200;
-        }
-        catch(dbError) {
-            console.log("Error When Updating User Password: " + dbError);
             const error = new Error("Internal Server Error");
             error.status = 500;
             throw error;

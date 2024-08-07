@@ -171,83 +171,145 @@ app.get('/api/contact', async (req,res) => {
 });
 
 app.post('/api/contact', async (req,res) => {
-  const authen = req.headers.authorization;
-  if (authen === undefined) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  const encodedCredential = authen.split(" ")[1];
-  const decodedCredential = atob(encodedCredential);
-
-  const authenParts = decodedCredential.split(":");
-  const userEmail = authenParts[0];
-  const userPassword = authenParts[1];
-
-  if (userEmail === undefined || userPassword === undefined) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  const body = req.body;
-  const mode = body.mode;
-  const contact_id = body.contact_id;
-  const blockStatus = body.blockStatus;
-
-  if (mode === undefined || userPassword === contact_id) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  if (mode !== 'add' && mode !== 'del' && mode !== 'block') {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  if (isNaN(contact_id) === true) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
   try {
-      const userController = new User_Controller();
-      await userController.authenticateUser(userEmail, userPassword);
+    const authen = req.headers.authorization;
+    if (authen === undefined) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
 
-      if (mode === 'add') {
-        const manageContactResult = await userController.userAddContact(parseInt(contact_id));
-        res.status(manageContactResult).send({ message: 'Contact Successfully Added' });
-      } else if (mode === 'block') {
-        if (blockStatus === undefined) {
-          const badRequestError = new Error('Bad Request');
-          badRequestError.status = 400;
-          res.status(badRequestError.status).json({error: badRequestError.message});
-        }
+    const encodedCredential = authen.split(" ")[1];
+    const decodedCredential = atob(encodedCredential);
+  
+    const authenParts = decodedCredential.split(":");
+    const userEmail = authenParts[0];
+    const userPassword = authenParts[1];
 
-        if (isNaN(blockStatus) === true) {
-          const badRequestError = new Error('Bad Request');
-          badRequestError.status = 400;
-          res.status(badRequestError.status).json({error: badRequestError.message});
-        }
+    if (userEmail === undefined || userPassword === undefined) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
 
-        const manageContactResult = await userController.userSetBlockStatus(blockStatus, parseInt(contact_id));
-        res.status(manageContactResult).send({ message: 'Block Status Successfully Changed' });
-      } else if (mode === 'del') {
-        const manageContactResult = await userController.userDeleteContact(parseInt(contact_id));
-        res.status(manageContactResult).send({ message: 'Contact Successfully Deleted' });
-      }
+    const body = req.body;
+    const mode = body.mode;
+    const contact_id = body.contact_id;
 
+    if (mode === undefined || contact_id === undefined) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+  
+    if (mode !== 'add' && mode !== 'del') {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+  
+    if (isNaN(contact_id) === true) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+
+    const userController = new User_Controller();
+    await userController.authenticateUser(userEmail, userPassword);
+
+    if (mode === 'add') {
+      const manageContactResult = await userController.userAddContact(parseInt(contact_id));
+      res.status(manageContactResult).send({ message: 'Contact Successfully Added' });
+    } else if (mode === 'del') {
+      const manageContactResult = await userController.userDeleteContact(parseInt(contact_id));
+      res.status(manageContactResult).send({ message: 'Contact Successfully Deleted' });
+    }
   } catch (error) {
-      res.status(error.status).json({error: error.message});
+    res.status(error.status).json({error: error.message});
   }
 });
 
-app.get('/api/block_status', async (req,res) => {
-  const authen = req.headers.authorization;
+app.post('/api/user', async (req, res) => {
+  try {
+    const authen = req.headers.authorization;
+    if (authen === undefined) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+
+    const encodedCredential = authen.split(" ")[1];
+    const decodedCredential = atob(encodedCredential);
+  
+    const authenParts = decodedCredential.split(":");
+    const userEmail = authenParts[0];
+    const userPassword = authenParts[1];
+
+    if (userEmail === undefined || userPassword === undefined) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+
+    const body = req.body;
+    const mode = body.mode;
+    const contact_id = body.contact_id;
+    const blockStatus = body.blockStatus;
+
+    if (mode === undefined || contact_id === undefined) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+  
+    if (mode !== 'block' && mode !== 'report') {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+  
+    if (isNaN(contact_id) === true) {
+      const badRequestError = new Error('Bad Request');
+      badRequestError.status = 400;
+      res.status(badRequestError.status).json({error: badRequestError.message});
+    }
+
+    const userController = new User_Controller();
+    await userController.authenticateUser(userEmail, userPassword);
+
+    if (mode === 'block') {
+      if (blockStatus === undefined) {
+        const badRequestError = new Error('Bad Request');
+        badRequestError.status = 400;
+        res.status(badRequestError.status).json({error: badRequestError.message});
+      }
+
+      if (isNaN(blockStatus) === true) {
+        const badRequestError = new Error('Bad Request');
+        badRequestError.status = 400;
+        res.status(badRequestError.status).json({error: badRequestError.message});
+      }
+
+      const manageContactResult = await userController.userSetBlockStatus(parseInt(blockStatus), parseInt(contact_id));
+      res.status(manageContactResult).send({ message: 'Block Status Successfully Changed' });
+    } else if (mode === 'report') {
+      const manageContactResult = await userController.userReport(parseInt(contact_id));
+      res.status(manageContactResult).send({ message: 'User Successfully Reported' });
+    }
+  } catch (error) {
+    if (error.status !== undefined) {
+      res.status(error.status).json({error: error.message});
+    } else {
+      console.log(error);
+      const internalServerError = new Error('Internal Server Error');
+      internalServerError.status = 500;
+      res.status(internalServerError.status).json({error: internalServerError.message});
+    }
+  }
+});
+
+app.get('/api/call', async (req,res) => {
+  /*const authen = req.headers.authorization;
   if (authen === undefined) {
     const badRequestError = new Error('Bad Request');
     badRequestError.status = 400;
@@ -288,7 +350,7 @@ app.get('/api/block_status', async (req,res) => {
       res.json({isBlocked: isBlocked});
   } catch (error) {
       res.status(error.status).json({error: error.message});
-  }
+  }*/
 });
 
 app.get('/api/statistic', async (req,res) => {

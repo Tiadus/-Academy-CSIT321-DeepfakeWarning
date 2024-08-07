@@ -2,6 +2,8 @@ const User = require('../Class_Entity/User');
 const Contact = require('../Class_Entity/Contact');
 const Call_History = require('../Class_Entity/Call_History');
 const ServiceTime = require('./ServiceTime');
+const Block_Log = require('../Class_Entity/Block_Log');
+const Report_Log = require('../Class_Entity/Report_Log');
 
 class User_Controller {
     constructor() {
@@ -54,9 +56,27 @@ class User_Controller {
         }
     }
 
-    async userSetBlockStatus(blocked, stored_id) {
+    async userSetBlockStatus(blockStatus, contact_id) {
         try {
-            await Contact.setBlockStatus(blocked, this.user.userID, stored_id);
+            if (blockStatus === 0) {
+                await Block_Log.unblock(contact_id, this.user.userID);
+                return 200;
+            } else if (blockStatus === 1) {
+                await Block_Log.block(contact_id, this.user.userID);
+                return 200;
+            } else {
+                const badRequestError = new Error('Bad Request');
+                badRequestError.status = 400;
+                throw badRequestError;
+            }
+        } catch(error) {
+            throw error;
+        }
+    }
+
+    async userReport(contact_id) {
+        try {
+            await Report_Log.report(contact_id, this.user.userID);
             return 200;
         } catch(error) {
             throw error;

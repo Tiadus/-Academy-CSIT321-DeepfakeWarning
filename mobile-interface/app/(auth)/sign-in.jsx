@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import {View, Text, TouchableOpacity, Image, TextInput, Alert} from 'react-native';
 import { Link, router } from "expo-router";
 import { useGlobalContext } from "../../context/GlobalStatus";
-
 import { images } from "../../constants";
-
-import axios from 'axios'
+import axios from 'axios';
 
 export default function Signin() {
   const {config, user, setUser, setWebSocket} = useGlobalContext();

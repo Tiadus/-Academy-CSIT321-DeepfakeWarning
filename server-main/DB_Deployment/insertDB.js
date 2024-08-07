@@ -5,7 +5,7 @@ async function batchInsertUsers(dbConnection, userList) {
 
         // Prepare the insert query
         const queryUser = 
-        'INSERT INTO APP_USER (email, user_name, avatar, phone, user_password) VALUES ?';
+        'INSERT INTO APP_USER (email, user_name, avatar, phone, user_password, modified_by) VALUES ?';
 
         // Format the data for batch insert
         const valueUser = 
@@ -16,6 +16,7 @@ async function batchInsertUsers(dbConnection, userList) {
                 item.avatar,
                 item.phone,
                 item.password,
+                0
             ]);
 
         // Execute the batch insert query
@@ -36,15 +37,14 @@ async function batchInsertContacts(dbConnection, contactList) {
 
         // Prepare the insert query
         const queryContact = 
-        'INSERT INTO CONTACT (storer_id, stored_id, blocked) VALUES ?';
+        'INSERT INTO CONTACT (storer_id, stored_id) VALUES ?';
 
         // Format the data for batch insert
         const valueContact = 
         contactList.map(item => 
             [
                 item.storer,
-                item.stored,
-                item.blocked,
+                item.stored
             ]);
 
         // Execute the batch insert query
@@ -65,7 +65,7 @@ async function batchCallHistory(dbConnection, historyList) {
 
         // Prepare the insert query
         const queryCallHistory = 
-        'INSERT INTO CALL_HISTORY (sender, receiver, call_date, call_status, deepfake) VALUES ?';
+        'INSERT INTO CALL_HISTORY (sender, receiver, call_date, call_status, deepfake, room_id, modified_by) VALUES ?';
 
         // Format the data for batch insert
         const valueCallHistory = 
@@ -76,6 +76,8 @@ async function batchCallHistory(dbConnection, historyList) {
                 item.callDate,
                 item.status,
                 item.deepfake,
+                item.room_id,
+                0
             ]);
 
         // Execute the batch insert query

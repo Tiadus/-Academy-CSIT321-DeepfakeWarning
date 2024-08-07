@@ -55,12 +55,10 @@ function generateContacts() {
     for (let i = 0; i < 14; i++) {
         const storer = 15;
         const stored = i+1;
-        const blocked = false;
 
         const aContact = {
             storer: storer,
-            stored: stored,
-            blocked: blocked
+            stored: stored
         }
 
         contactList.push(aContact);
@@ -102,13 +100,16 @@ function generateCallHistory() {
         const receiver = i;
         const status = getRandomInt(0,2);
         const deepfake = getRandomInt(0,1);
+        const time = getServerCallTime();
+        const room_id = `C${sender}R${receiver}T${time[0]}${time[1]}${time[3]}${time[4]}${time[5]}${time[6]}`;
 
         const aHistory = {
             sender: sender,
             receiver: receiver,
             callDate: callDate,
             status: status,
-            deepfake: deepfake
+            deepfake: deepfake,
+            room_id: room_id
         }
 
         historyList.push(aHistory);
@@ -119,13 +120,16 @@ function generateCallHistory() {
         const receiver = 15;
         const status = getRandomInt(0,2);
         const deepfake = getRandomInt(0,1);
+        const time = getServerCallTime();
+        const room_id = `C${sender}R${receiver}T${time[0]}${time[1]}${time[3]}${time[4]}${time[5]}${time[6]}`;
 
         const aHistory = {
             sender: sender,
             receiver: receiver,
             callDate: callDate,
             status: status,
-            deepfake: deepfake
+            deepfake: deepfake,
+            room_id: room_id
         }
 
         historyList.push(aHistory);

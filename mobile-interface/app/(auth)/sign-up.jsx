@@ -4,6 +4,7 @@ import { Link, router } from "expo-router";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { images } from "../../constants";
 import axios from 'axios';
+import {LinearGradient} from 'expo-linear-gradient';
 
 export default function Signup() {
   const [userName, onChangeUserName] = useState('');
@@ -90,74 +91,89 @@ export default function Signup() {
 
   return (
     <KeyboardAwareScrollView 
-      className="bg-white h-full" 
+      className="bg-background-primary h-full" 
       keyboardVerticalOffset={0 + 47}
       behavior="padding"
       style={{ flex: 1 }}
       enabled
     >
-      <View className="bg-white h-full items-center" >
-        <Image
-          source={images.logo}
-          className="w-[110px] h-[110px] mb-10 mt-20"
-        />
-        <Text className="font-bold text-5xl mb-1">REGISTER</Text>
+      <View className="h-full items-center bg-background-primary" >
+        <View className="items-center w-full mt-20 mb-4">
+          <LinearGradient
+              className='items-center justify-center w-[110px] h-[110px] rounded-full p-2 mb-4'
+              start={{ x: 0.0, y: 0.0 }} end={{ x: 0.0, y: 1.0 }}
+              colors={['#0B5DFB', '#99008A']}
+          >
+            <View className='items-center justify-center w-[95px] h-[95px] rounded-full'>
+              <Image
+                source={images.logo}
+                className="w-full h-full"
+              />
+            </View>
+          </LinearGradient>
+          <Text className="font-bold text-5xl text-text-primary">REGISTER</Text>
+        </View>
         <View className="w-10/12">
-          <Text className="font-bold text-lg self-start mb-2">Full Name</Text>
+          <Text className="mb-2 font-bold text-lg text-text-primary">Full Name</Text>
           <TextInput
-            className="border rounded-xl p-2 mb-2"
+            className="border-2 border-border-outline rounded-xl p-2 mb-2 text-text-primary"
             placeholder="Enter Your Full Name"
+            placeholderTextColor="#F1F1F1"
             onChangeText={(value) => onChangeUserName(value)}
           />
         </View>
         <View className="w-10/12">
-          <Text className="font-bold text-lg self-start mb-2">Email</Text>
+          <Text className="mb-2 font-bold text-lg text-text-primary">Email</Text>
           <TextInput
-            className="border rounded-xl p-2 mb-2"
+            className="border-2 border-border-outline rounded-xl p-2 mb-2 text-text-primary"
             placeholder="Enter Your Email"
+            placeholderTextColor="#F1F1F1"
             onChangeText={(value) => onChangeUserEmail(value)}
           />
         </View>
         <View className="w-10/12">
-          <Text className="font-bold text-lg self-start mb-2">Phone Number</Text>
+          <Text className="mb-2 font-bold text-lg text-text-primary">Phone Number</Text>
           <TextInput
-            className="border rounded-xl p-2 mb-2"
+            className="border-2 border-border-outline rounded-xl p-2 mb-2 text-text-primary"
             placeholder="Enter Your Phone Number"
+            placeholderTextColor="#F1F1F1"
             onChangeText={(value) => onChangeUserPhone(value)}
           />
         </View>
         <View className="w-10/12">
-          <Text className="font-bold text-lg self-start mb-2">Password</Text>
+          <Text className="mb-2 font-bold text-lg text-text-primary">Password</Text>
           <TextInput
-            className="border rounded-xl p-2 mb-2"
+            className="border-2 border-border-outline rounded-xl p-2 mb-2 text-text-primary"
             placeholder="Enter Your Password"
+            placeholderTextColor="#F1F1F1"
             onChangeText={(value) => onChangeUserPassword(value)}
             secureTextEntry={true}
           />
         </View>
         <View className="w-10/12 mb-4">
-          <Text className="font-bold text-lg self-start mb-2">Confirm Password</Text>
+          <Text className="mb-2 font-bold text-lg text-text-primary">Confirm Password</Text>
           <TextInput
-            className="border rounded-xl p-2 mb-2"
+            className="border-2 border-border-outline rounded-xl p-2 mb-2 text-text-primary"
             placeholder="Confirm Your Password"
+            placeholderTextColor="#F1F1F1"
             onChangeText={(value) => onChangeUserConfirmPassword(value)}
             secureTextEntry={true}
           />
         </View>
         <TouchableOpacity
-          className="rounded-xl w-10/12 items-center justify-center h-12 mb-4"
-          style={{backgroundColor: '#343434'}}
+          className="items-center justify-center w-10/12 h-12 rounded-xl mb-4 bg-button-secondary"
           onPress={handleRegister}
         >
-          <Text className="text-white">REGISTER</Text>
+          <Text className="text-text-primary">REGISTER</Text>
         </TouchableOpacity>
-        <Text className="text-lg">Already have an account?</Text>
-        <Link
-          className="font-bold text-lg underline"
-          href="/sign-in"
-        >
-          Sign In
-        </Link>
+        <Text className="text-lg text-text-primary">Already have an account?</Text>
+        <TouchableOpacity
+              onPress={() => {
+                router.replace('sign-in')
+              }}
+            >
+              <Text className="font-bold text-lg underline text-text-primary">Sign In</Text>
+            </TouchableOpacity>
       </View>
     </KeyboardAwareScrollView>
   )

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import {View, Text, TouchableOpacity, Image, TextInput, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, Image, TextInput, Alert, SafeAreaView} from 'react-native';
 import { Link, router } from "expo-router";
 import { useGlobalContext } from "../../context/GlobalStatus";
+import {LinearGradient} from 'expo-linear-gradient';
 import { images } from "../../constants";
 import axios from 'axios';
 
@@ -92,44 +93,62 @@ export default function Signin() {
   }
 
   return (
-    <View className="items-center bg-white h-full">
-      <Image
-        source={images.logo}
-        className="w-[110px] h-[110px] mb-10 mt-20"
-      />
-      <Text className="font-bold text-5xl mb-10">SIGN IN</Text>
-      <View className="w-10/12">
-        <Text className="font-bold text-lg self-start mb-2">Email/Phone Number</Text>
-        <TextInput
-          className="border rounded-xl p-2 mb-2"
-          placeholder="Enter Your Email/Phone Number"
-          onChangeText={(value) => onChangeUserEmail(value)}
-        />
-      </View>
-      <View className="w-10/12">
-        <Text className="font-bold text-lg self-start mb-2">Password</Text>
-        <TextInput
-          className="border rounded-xl p-2 mb-2"
-          placeholder="Enter Your Password"
-          onChangeText={(value) => onChangeUserPassword(value)}
-          secureTextEntry={true}
-        />
-        <Text className="self-end underline mb-8">Forgot Password?</Text>
-      </View>
-      <TouchableOpacity
-        className="rounded-xl w-10/12 items-center justify-center h-12 mb-8"
-        style={{backgroundColor: '#343434'}}
-        onPress={handleLogin}
-      >
-        <Text className="text-white">SIGN IN</Text>
-      </TouchableOpacity>
-      <Text className="text-lg">Don't have an account?</Text>
-      <Link
-        className="font-bold text-lg underline"
-        href="/sign-up"
-      >
-        Register
-      </Link>
-    </View>
+    <SafeAreaView className="flex flex-col items-center w-full h-full bg-background-primary">
+        <View className="items-center w-full mt-20 mb-4">
+          <LinearGradient
+              className='items-center justify-center w-[110px] h-[110px] rounded-full p-2 mb-4'
+              start={{ x: 0.0, y: 0.0 }} end={{ x: 0.0, y: 1.0 }}
+              colors={['#0B5DFB', '#99008A']}
+          >
+            <View className='items-center justify-center w-[95px] h-[95px] rounded-full'>
+              <Image
+                source={images.logo}
+                className="w-full h-full"
+              />
+            </View>
+          </LinearGradient>
+          <Text className="font-bold text-5xl text-text-primary">SIGN IN</Text>
+        </View>
+        <View className="w-10/12 gap-y-3 mb-4">
+          <View className="w-full">
+            <Text className="font-bold text-lg text-text-primary mb-2">Email/Phone Number</Text>
+            <TextInput
+              className="border-2 border-border-outline rounded-xl p-2 text-text-primary"
+              placeholder="Enter Your Email/Phone Number"
+              placeholderTextColor="#F1F1F1"
+              onChangeText={(value) => onChangeUserEmail(value)}
+            />
+          </View>
+          <View className="w-full">
+            <Text className="font-bold text-lg text-text-primary mb-2">Password</Text>
+            <TextInput
+              className="border-2 border-border-outline rounded-xl p-2 text-text-primary"
+              placeholder="Enter Your Password"
+              placeholderTextColor="#F1F1F1"
+              onChangeText={(value) => onChangeUserPassword(value)}
+              secureTextEntry={true}
+            />
+            <Text className="self-end underline text-text-primary">Forgot Password?</Text>
+          </View>
+        </View>
+        <View className="w-10/12 gap-y-2">
+          <TouchableOpacity
+            className="items-center justify-center w-full h-12 rounded-xl bg-button-primary"
+            onPress={handleLogin}
+          >
+            <Text className="text-text-primary">SIGN IN</Text>
+          </TouchableOpacity>
+          <View className="items-center">
+            <Text className="text-lg text-text-primary">Don't have an account?</Text>
+            <TouchableOpacity
+              onPress={() => {
+                router.replace('sign-up')
+              }}
+            >
+              <Text className="font-bold text-lg underline text-text-primary">Register</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+    </SafeAreaView>
   )
 }

@@ -1,4 +1,4 @@
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Image } from "react-native";
 import { Text } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
@@ -13,44 +13,35 @@ export default CallInfo = ({history}) => {
     router.navigate('/info');
   }
 
+  // 0 = Missed
+  // 1 = Declined
+  // 2 = Connected
+
   return (
     <TouchableOpacity 
-      className="w-full flex flex-row space-x-2 p-2"
+      className="flex flex-row w-full h-[66px] space-x-2 p-2"
       onPress={handleContactPress}
     >
-      <MaterialCommunityIcons
-        name="account-circle-outline"
-        size={36}
-        color="gray"
-        className="basis-1/10"
-      />
-      <View className='border-b border-slate-400 flex-1 flex-row'>
+      <View className="justify-center h-full">
+        <Image className="w-[36] h-[36] rounded-full"
+          source={{uri: ('http://localhost:4000/' + history.avatar)}}
+        />
+      </View>
+      <View className='border-b border-text-secondary flex-1 flex-row'>
         <View className="justify-center space-y-1 w-8/12">
-          {history.call_status == '0' && <Text className="text-red-500">{history.user_name}</Text>}
-          {history.call_status == '1' && <Text className="text-red-500">{history.user_name}</Text>}
-          {history.call_status == '2' && <Text className="text-green-500">{history.user_name}</Text>}
-          {history.call_status == '0' &&
+          <Text className={history.call_status == '0' ? "text-text-danger" : "text-text-primary"}>{history.user_name}</Text>
             <View className="flex-row space-x-2">
-              <Feather name="phone-missed" size={16} color="gray" />
-              <Text className="text-slate-700">{'Missed'}</Text>
+              <View className="items-center justify-center">
+                <MaterialCommunityIcons name={history.call_status == '0' ? "phone-missed" : "phone"} size={16} color="#767676"/>
+              </View>
+              <Text className="text-text-secondary">
+                {history.call_status == '0' ? "Missed" : (history.call_status == '1' ? "Declined" : "Connected")}
+              </Text>
             </View>
-          }
-          {history.call_status == '1' &&
-            <View className="flex-row space-x-2">
-              <Feather name="phone-missed" size={16} color="gray" />
-              <Text className="text-slate-700">{'Rejected'}</Text>
-            </View>
-          }
-          {history.call_status == '2' &&
-            <View className="flex-row space-x-2">
-              <Feather name="phone-call" size={16} color="gray" />
-              <Text className="text-slate-700">{'Connected'}</Text>
-            </View>
-          }
         </View>
-        <View className="flex-row items-center justify-center">
-          <Text className="text-slate-700">{history.call_date}</Text>
-          <Feather name="info" size={24} color="gray" />
+        <View className="flex-row items-center justify-center gap-x-1">
+          <Text className="text-text-secondary">{history.call_date}</Text>
+          <Feather name="info" size={24} color="#767676" />
         </View>
       </View>
     </TouchableOpacity>

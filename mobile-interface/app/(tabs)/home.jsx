@@ -1,8 +1,9 @@
-import { Image, ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, View, SafeAreaView } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useState } from "react";
 import { Button, SegmentedButtons } from "react-native-paper";
 import { CallInfo } from "@/components/ui/CallInfo";
+import {LinearGradient} from 'expo-linear-gradient';
 
 import { images } from "../../constants";
 import { useIsFocused } from "@react-navigation/native";
@@ -18,7 +19,7 @@ export default function Home() {
   const isFocused = useIsFocused();
   const {user} = useGlobalContext();
   const [value, setValue] = useState("in");
-  const [statistic, setStatistic] = useState({incomingCallHistory: [{user_id: '1'}], outgoingCallHistory: [{user_id: '1'}]})
+  const [statistic, setStatistic] = useState({})
 
   useEffect(() => {
       if (isFocused == true) {
@@ -46,72 +47,93 @@ export default function Home() {
   }
 
   return (
-    <View className='bg-white h-full'>
-      <View className="flex p-4 gap-4 mt-8">
-        <View className=" flex-row py-4">
-          <View className="justify-center overflow-hidden w-9/12">
-            <Text className="text-4xl font-bold mb-2">Dashboard</Text>
-            <Text numberOfLines={1}>HELLO {user.user_name}!</Text>
-          </View>
-          <View className="items-center justify-center self-end flex-1">
-              <Image source={images.logo} className="w-[80px] h-[80px] self-end"/>
-          </View>
+    <SafeAreaView className='items-center h-full bg-background-primary'>
+      <View className='h-full w-11/12 bg-background-primary'>
+        <View className='flex-col mt-20 mb-10'>
+          <Text className='font-extrabold text-4xl text-text-primary'>DASHBOARD</Text>
+          <Text className='font-bold text-2xl text-app-primary'>Welcome!</Text>
         </View>
-        <View className="bg-[#D9D9D9] p-4 rounded-3xl">
-          <View className="flex-row justify-between items-center ">
-            <View className="justify-center">
-              <Text className="text-2xl">PERSONAL STATISTICS</Text>
-              <View className="flex-row justify-between relative">
-                <View className="mr-12 items-center justify-center">
-                  <Text>From The Beginning</Text>
-                  {statistic.incomingCallHistory !== undefined &&
-                  <Text className="text-4xl font-bold"> 
-                    {statistic.incomingCallHistory.length + statistic.outgoingCallHistory.length} Calls
-                  </Text>}
-                </View>
-                <View className="items-center ml-12">
-                  <Image
-                      className="z-0"
-                      source={require("../../assets/images/ProgressCircle.png")}
-                  />
-                  <View className='z-10 absolute mt-5 items-center'>
-                      <Text className="text-3xl text-[#00278A] font-bold">{statistic.deepfakeCallPercentage}</Text>
-                      <Text className="text-lg text-[#00278A] font-bold">
-                      Deepfake
-                      </Text>
+        <View className='flex-row w-full mb-10'>
+          <View className='w-1/2'>
+            <View className='self-start flex-col gap-y-2 items-center'>
+              <LinearGradient
+                  className='items-center justify-center w-[175px] h-[175px] rounded-full p-2'
+                  start={{ x: 0.0, y: 0.0 }} end={{ x: 0.0, y: 1.0 }}
+                  colors={['#8AE3FF', '#8AE3FF', '#8AE3FF', '#1A5AFF', '#1A5AFF', '#AEA7FF', '#AEA7FF', '#9C3AFF']}
+              >
+                <View className='items-center justify-center w-[150px] h-[150px] rounded-full bg-background-secondary'>
+                  <View className='flex-1 items-center justify-center'>
+                    <Text numberOfLines={1} className='font-bold text-[50px] text-app-primary'>
+                      {statistic.incomingCallHistory ? statistic.incomingCallHistory.length + statistic.outgoingCallHistory.length : ''}
+                    </Text>
                   </View>
                 </View>
-              </View>
+              </LinearGradient>
+              <Text className='font-bold text-2xl text-app-primary'>Calls</Text>
+            </View>
+          </View>
+          <View className='w-1/2'>
+            <View className='self-end flex-col gap-y-2 items-center'>
+              <LinearGradient
+                  className='items-center justify-center w-[175px] h-[175px] rounded-full p-2'
+                  start={{ x: 0.0, y: 0.0 }} end={{ x: 0.0, y: 1.0 }}
+                  colors={['#BD8AFF', '#BD8AFF', '#BD8AFF', '#99008A', '#99008A', '#FFA7F1', '#FFA7F1', '#FF3ADF']}
+              >
+                <View className='items-center justify-center w-[150px] h-[150px] rounded-full bg-background-secondary'>
+                  <View className='flex-1 items-center justify-center'>
+                    <Text className='font-bold text-[50px] text-app-secondary'>
+                      {statistic.deepfakeCallPercentage ? statistic.deepfakeCallPercentage : ''}
+                    </Text>
+                  </View>
+                </View>
+              </LinearGradient>
+              <Text className='font-bold text-2xl text-app-secondary'>Flagged</Text>
             </View>
           </View>
         </View>
-        <View className=" flex gap-y-2 items-center">
-          <View className="flex flex-row w-full justify-between items-center">
-            <Text className="text-4xl font-bold ">Calls</Text>
-            <Entypo name="dots-three-horizontal" size={24} color="black" />
+        <View className='gap-y-4'>
+          <Text className="text-2xl text-text-primary">CALL HISTORY</Text>
+          <View className="self-center flex flex-row items-center justify-between w-1/2 rounded">
+            <SegmentedButtons 
+                className='rounded bg-background-primary'
+                value={value}
+                onValueChange={setValue}
+                buttons={[
+                    {
+                      value: "in",
+                      label: "Incoming",
+                      style: {
+                        backgroundColor: value === "in" ? "#181658" : "#0A083F", // Focus and Unfocus background
+                        borderRadius: 12, // Customize the roundness
+                        borderColor: "transparent",
+                      },
+                      labelStyle: {
+                        color: value === "in" ? "#F1F1F1" : "#767676", // Focus and Unfocus text color
+                      }
+                    },
+                    {
+                      value: "out",
+                      label: "Outgoing",
+                      style: {
+                        backgroundColor: value === "out" ? "#181658" : "#0A083F",
+                        borderRadius: 12,
+                        borderColor: "transparent",
+                      },
+                      labelStyle: {
+                        color: value === "out" ? "#F1F1F1" : "#767676",
+                      }
+                    }
+                ]}
+            />
           </View>
-          <View className="flex flex-row  rounded-md w-1/2 bg-[#D9D9D9] items-center justify-between">
-          <SegmentedButtons 
-              className='bg-white'
-              value={value}
-              onValueChange={setValue}
-              buttons={[
-                  {value: "in",
-                  label: "Incoming"
-                  },
-                  {value: "out",
-                  label: "Outgoing"
-                  }
-              ]}
-          />
-          </View>
-          <Text className="text-2xl w-full">Recent</Text>
-          <View className=" bg-[#D9D9D9] w-full rounded-3xl h-1/2">
-            {statistic.incomingCallHistory !== undefined && value === 'in' && <CallHistory histories={statistic.incomingCallHistory}></CallHistory>}
-            {statistic.outgoingCallHistory !== undefined && value === 'out' && <CallHistory histories={statistic.outgoingCallHistory}></CallHistory>}
+          <View className= "w-full rounded-3xl h-1/2 overflow-hidden">
+            {
+              statistic.incomingCallHistory !== undefined && 
+              <CallHistory histories={value === "in" ? statistic.incomingCallHistory : statistic.outgoingCallHistory}></CallHistory>
+            }
           </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

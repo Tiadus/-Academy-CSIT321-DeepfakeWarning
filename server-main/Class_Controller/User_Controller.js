@@ -162,7 +162,11 @@ class User_Controller {
                 }
             }
 
-            const deepfakeCallPercentage = ((deepfakeCallQuantity / (incomingCallHistory.length + outgoingCallHistory.length)) * 100).toString() + '%';
+            let deepfakeCallPercentage = '0%';
+
+            if (incomingCallHistory.length + outgoingCallHistory.length !== 0) {
+                deepfakeCallPercentage = ((deepfakeCallQuantity / (incomingCallHistory.length + outgoingCallHistory.length)) * 100).toString() + '%';
+            }
 
             return {
                 incomingCallHistory: incomingCallHistory,

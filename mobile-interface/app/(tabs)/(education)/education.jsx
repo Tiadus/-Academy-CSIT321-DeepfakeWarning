@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, SafeAreaView} from 'react-native';
 import {LinearGradient} from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from "expo-router";
@@ -42,7 +42,19 @@ export default function Education() {
     }
 
     return (
-        <View className='items-center h-full bg-white flex-col'>
+        <SafeAreaView className='items-center h-full bg-background-primary'>
+            <View className='h-full w-11/12 bg-background-primary'>
+                <View className='flex-col mt-20 mb-10'>
+                    <Text className='font-extrabold text-4xl text-text-primary'>LESSONS</Text>
+                </View>
+                <ScrollView className= 'h-full w-full flex-1'>
+                    {titles.map((title) => (
+                        <EducationTitle key={title.education_id} education={title}></EducationTitle>
+                    ))}
+                </ScrollView>
+            </View>
+        {
+        /*<View className='items-center h-full bg-white flex-col'>
             <View className='items-center justify-center mt-20 mb-4'>
                 <LinearGradient 
                     className='rounded-full p-2'
@@ -65,6 +77,8 @@ export default function Education() {
                     <EducationTitle key={title.education_id} education={title}></EducationTitle>
                 ))}
             </ScrollView>
-        </View>
+        </View>*/
+        }
+        </SafeAreaView>
     )
 }

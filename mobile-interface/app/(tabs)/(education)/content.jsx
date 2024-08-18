@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, SafeAreaView} from 'react-native';
 import { useGlobalContext } from "../../../context/GlobalStatus";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -30,10 +30,12 @@ export default function Content() {
     }
 
     return(
-        <View className='h-full bg-white'>
-            <ScrollView className='h-full self-start ml-2'>
-                <Text className='text-lg'>{content.content}</Text>
+        <SafeAreaView className='items-center h-full bg-background-primary'>
+          <View className='flex flex-col w-10/12 h-full bg-background-primary'>
+            <ScrollView className='h-full'>
+                <Text className='text-lg text-text-primary'>{content.content}</Text>
             </ScrollView>
-        </View>
+          </View>
+        </SafeAreaView>
     )
 }

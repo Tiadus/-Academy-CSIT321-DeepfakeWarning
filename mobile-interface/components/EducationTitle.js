@@ -1,6 +1,7 @@
 import {View, Text, TouchableOpacity} from 'react-native';
 import { router } from "expo-router";
 import { useGlobalContext } from '../context/GlobalStatus';
+import {LinearGradient} from 'expo-linear-gradient';
 
 export default function EducationTitle({education}) {
     const {setFocusContent} = useGlobalContext();
@@ -25,11 +26,17 @@ export default function EducationTitle({education}) {
                     handleContactPress();
                 }}
             >
-            <View className='border border-solid border-black rounded-full h-12 w-12 p-1 items-center justify-center bg-blue-50'>
-                <Text className='text-lg font-bold'>{formatInteger(education.education_id)}</Text>
+            <View className='flex items-center justify-center'>
+                    <LinearGradient
+                        className='items-center justify-center w-12 h-12 rounded-full p-2'
+                        start={{ x: 0.0, y: 0.0 }} end={{ x: 0.0, y: 1.0 }}
+                        colors={['#0B5DFB', '#99008A']}
+                    >
+                        <Text className='text-lg font-bold text-text-primary'>{formatInteger(education.education_id)}</Text>
+                    </LinearGradient>
             </View>
             <View className='ml-2 justify-center flex-1 overflow-hidden'>
-                <Text numberOfLines={2} className='text-lg font-bold'>{education.title}</Text>
+                <Text numberOfLines={2} className='text-lg font-bold text-text-primary'>{education.title}</Text>
             </View>
         </TouchableOpacity>
     )

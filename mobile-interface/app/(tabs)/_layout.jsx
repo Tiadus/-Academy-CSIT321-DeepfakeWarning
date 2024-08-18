@@ -51,10 +51,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="(phone)"
         options={{
-          title: 'Contact',
+          title: 'Contacts',
           tabBarLabel: ({ focused }) => (
             <Text className={focused ? 'text-app-secondary-glow' : 'text-border-outline'}>
-              Contact
+              Contacts
             </Text>
           ),
           tabBarIcon: ({ color, focused }) => (

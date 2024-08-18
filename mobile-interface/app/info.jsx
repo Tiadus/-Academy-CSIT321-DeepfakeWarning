@@ -1,4 +1,4 @@
-import {View, Text, Button, Image, TouchableOpacity, Alert} from 'react-native';
+import {View, Text, Button, Image, TouchableOpacity, Alert, SafeAreaView} from 'react-native';
 import { router } from "expo-router";
 import { useGlobalContext } from "../context/GlobalStatus";
 import { images } from "../constants";
@@ -224,67 +224,54 @@ export default function Info() {
     }
 
     return (
-        <View className="bg-white h-full items-center flex-col">
-            <View 
-                className='overflow-hidden rounded-full border-solid border-4 border-fuchsia-700 w-48 h-48 items-center mt-8 mb-12'>
-                <Image 
-                    source={{uri: ('http://localhost:4000/' + focusContact.avatar)}} 
-                    className="w-[210px] h-[210px] mb-12 overflow-hidden rounded-full"
-                />
-            </View>
-            <View className="w-11/12 border-b pb-1 border-gray-400 mb-4">
-                <Text className="text-lg self-start mb-2 text-gray-400 font-bold">Full Name</Text>
-                <View className='flex-row'>
-                    <Ionicons name='person-circle' style={{ fontSize: 30 }}/>
-                    <Text className="text-lg ml-2">{focusContact.user_name}</Text>
-                </View>
-            </View>
-            <View className="w-11/12 border-b pb-1 border-gray-400 mb-8">
-                <Text className="text-lg self-start mb-2 text-gray-400 font-bold">Phone Number</Text>
-                <View className='flex-row'>
-                    <Ionicons name='call' style={{ fontSize: 30 }}/>
-                    <Text className="text-lg ml-2">{focusContact.user_id}</Text>
-                </View>
-            </View>
-            <View className="w-11/12 flex-row">
-                <View className="w-1/2">
-                    <View className="w-11/12 pb-1 border-gray-400 mb-4">
-                        <TouchableOpacity onPress={handleAddContact} className="bg-green-600 rounded-xl items-center p-1">
-                            <Text className="text-lg text-white font-bold">Add Contact</Text>
-                        </TouchableOpacity>
+        <SafeAreaView className="flex-col items-center bg-background-primary">
+            <View className='h-full w-11/12 bg-background-primary'>
+                <View className='flex-col w-full mt-8 mb-8 items-center'>
+                    <View className='flex items-center justify-center w-[180px] h-[180px] overflow-hidden rounded-full border-solid border-4 mb-4 border-app-secondary'>
+                        <Image 
+                            source={{uri: ('http://localhost:4000/' + focusContact.avatar)}} 
+                            className="w-[180px] h-[180px] overflow-hidden rounded-full"
+                        />
                     </View>
-                    <View className="w-11/12 pb-1 border-gray-400 mb-4">
-                        <TouchableOpacity onPress={handleDeleteContact} className="bg-red-600 rounded-xl items-center p-1">
-                            <Text className="text-lg text-white font-bold">Delete Contact</Text>
-                        </TouchableOpacity>
+                    <View>
+                        <Text className="font-bold text-4xl text-text-primary">{focusContact.user_name}</Text>
                     </View>
-                    <View className="w-11/12 pb-1 border-gray-400">
-                        <TouchableOpacity onPress={handleReportUser} className="bg-black rounded-xl items-center p-1">
-                            <Text className="text-lg text-red-600 font-bold">Report User</Text>
+                </View>
+                <View className='flex-row w-full rounded-lg mb-8 bg-background-tertiary'>
+                    <View className='flex-col w-10/12 p-1 pl-2'>
+                        <Text className='text-lg text-text-primary'>Salos Number</Text>
+                        <Text className='text-lg text-text-warning'>
+                            {focusContact ? (focusContact.user_id ? focusContact.user_id : 'Not Available') : 'Not Available'}
+                        </Text>
+                    </View>
+                    <View className='flex-1 rounded-lg bg-background-primary'>
+                        <TouchableOpacity onPress={handleCallPress} className='flex-1 items-center justify-center w-full border border-app-primary rounded-lg bg-background-secondary'>
+                            <Ionicons name='call' style={{ fontSize: 40, color: "#F1F1F1" }}/> 
                         </TouchableOpacity>
                     </View>
                 </View>
-                <View className="w-1/2">
-                    <View className="w-11/12 pb-1 border-gray-400 mb-4">
-                        <TouchableOpacity onPress={handleBlockContact} className="bg-orange-500 rounded-xl items-center p-1">
-                            <Text className="text-lg text-white font-bold">Block Contact</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View className="w-11/12 pb-1 border-gray-400 mb-4">
-                        <TouchableOpacity onPress={handleUnblockContact} className="bg-cyan-600 rounded-xl items-center p-1">
-                            <Text className="text-lg text-white font-bold">Unblock Contact</Text>
-                        </TouchableOpacity>
-                    </View>
+                <View className='w-full gap-y-2 mb-8'>
+                    <TouchableOpacity onPress={handleAddContact} className='rounded-lg p-1 pl-2 bg-background-tertiary'>
+                        <Text className='text-lg text-app-primary-glow'>Add To Contacts</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleDeleteContact} className='rounded-lg p-1 pl-2 bg-background-tertiary'>
+                        <Text className='text-lg text-text-danger'>Delete From Contacts</Text>
+                    </TouchableOpacity>
+                </View>
+                <View className='w-full gap-y-2 mb-8'>
+                    <TouchableOpacity onPress={handleBlockContact} className='rounded-lg p-1 pl-2 bg-background-tertiary'>
+                        <Text className='text-lg text-text-danger'>Block User</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleUnblockContact} className='rounded-lg p-1 pl-2 bg-background-tertiary'>
+                        <Text className='text-lg text-app-primary-glow'>Unblock User</Text>
+                    </TouchableOpacity>
+                </View>
+                <View className='w-full gap-y-2'>
+                    <TouchableOpacity onPress={handleReportUser} className='rounded-lg p-1 pl-2 bg-background-tertiary'>
+                        <Text className='text-lg text-text-danger'>Report User</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-            <View className='flex-1 items-center justify-center'>
-                <TouchableOpacity
-                    className='bg-green-500 rounded-full p-2 border-solid border border-gray-600'
-                    onPress={handleCallPress}
-                >
-                    <Ionicons name='call' style={{ fontSize: 40, color: 'white' }}/> 
-                </TouchableOpacity>
-            </View>
-        </View>
+        </SafeAreaView>
     )
 }

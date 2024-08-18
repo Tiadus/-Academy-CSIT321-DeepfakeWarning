@@ -35,7 +35,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="upload"
+        name="detect"
         options={{
           title: 'Detect',
           tabBarLabel: ({ focused }) => (
@@ -77,16 +77,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="setting"
+        name="(settings)"
         options={{
-          title: 'Setting',
+          title: 'Settings',
           tabBarLabel: ({ focused }) => (
             <Text className={focused ? 'text-app-secondary-glow' : 'text-border-outline'}>
               Settings
             </Text>
           ),
           tabBarIcon: ({ color, focused }) => (
-            <TabBarIcon name={focused ? 'cog' : 'cog-outline'} color={color} />
+            <TabBarIcon name={focused ? 'settings' : 'settings-outline'} color={color} />
           ),
         }}
       />

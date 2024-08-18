@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import {View, Text, TouchableOpacity, Image, TextInput, Alert, KeyboardAvoidingView} from 'react-native';
-import { Link, router } from "expo-router";
+import { router } from "expo-router";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { images } from "../../constants";
 import axios from 'axios';
@@ -168,12 +168,12 @@ export default function Signup() {
         </TouchableOpacity>
         <Text className="text-lg text-text-primary">Already have an account?</Text>
         <TouchableOpacity
-              onPress={() => {
-                router.replace('sign-in')
-              }}
-            >
-              <Text className="font-bold text-lg underline text-text-primary">Sign In</Text>
-            </TouchableOpacity>
+          onPress={() => {
+            router.replace('sign-in')
+          }}
+        >
+          <Text className="font-bold text-lg underline text-text-primary">Sign In</Text>
+        </TouchableOpacity>
       </View>
     </KeyboardAwareScrollView>
   )

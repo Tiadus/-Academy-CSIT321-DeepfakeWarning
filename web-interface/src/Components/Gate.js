@@ -24,36 +24,34 @@ const Gate = ({setClientID}) => {
                 show={modalShow}
                 onHide={() => setModalShow(false)}
             />
-            <div class="d-flex justify-content-center align-items-center" style={{width: '50%', height: '50%'}}>
-                <div style={{width: '100%'}}>
-                    <div class="mb-3" style={{textAlign: "center"}}>
-                        <img style={{width: '40%', height: "40%"}} src='LOGO.png' alt='LOGO'/>
-                    </div>
-                    <input 
-                        ref={clientIDRef}
-                        type="number" 
-                        class="form-control mb-3" 
-                        style={{textAlign: 'center', borderColor: 'black', borderWidth: '3px', borderStyle: 'solid', borderRadius: '30px'}} 
-                        placeholder="Enter An Identifier"
-                    />
-                    <div class="d-flex justify-content-center align-items-center mb-3">
-                        <button 
-                            class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
-                            onClick={handleLogin}
-                        >
-                            CONNECT AS ADMIN
-                        </button>
-                    </div>
-                    <div class="d-flex justify-content-center align-items-center">
-                        <button 
-                            class="btn btn-info btn-lg btn-group d-flex justify-content-center align-items-center" 
-                            onClick={() => {
-                                setModalShow(true);
-                            }}
-                        >
-                            Instruction
-                        </button>
-                    </div>
+            <div class="w-1/2">
+                <div class="flex items-center justify-center w-full mb-3">
+                    <img class="w-[200px] h-[200px]" src='LOGO.png' alt='LOGO'/>
+                </div>
+                <input 
+                    ref={clientIDRef}
+                    type="number" 
+                    class="form-control mb-3" 
+                    style={{textAlign: 'center', borderColor: 'black', borderWidth: '3px', borderStyle: 'solid', borderRadius: '30px'}} 
+                    placeholder="Enter An Identifier"
+                />
+                <div class="d-flex justify-content-center align-items-center mb-3">
+                    <button 
+                        class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
+                        onClick={handleLogin}
+                    >
+                        CONNECT AS ADMIN
+                    </button>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <button 
+                        class="btn btn-info btn-lg btn-group d-flex justify-content-center align-items-center" 
+                        onClick={() => {
+                            setModalShow(true);
+                        }}
+                    >
+                        Instruction
+                    </button>
                 </div>
             </div>
         </>

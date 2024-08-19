@@ -14,7 +14,7 @@ export default function Signin() {
   useEffect(() => {
     if (user !== null) {
       try {
-        const socket = new WebSocket(config.server_main_ws);
+        const socket = new WebSocket('ws://localhost:4000');
   
         socket.onopen = () => {
           console.log('WebSocket connection opened');

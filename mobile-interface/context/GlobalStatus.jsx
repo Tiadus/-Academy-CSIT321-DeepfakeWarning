@@ -1,10 +1,9 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const GlobalContext = createContext();
 export const useGlobalContext = () => useContext(GlobalContext);
 
 const GlobalProvider = ({ children }) => {
-  const [config, setConfig] = useState(require('./app-config'));
   const [user, setUser] = useState(null);
   const [webSocket, setWebSocket] = useState(null);
   const [focusContact, setFocusContact] = useState({
@@ -13,11 +12,23 @@ const GlobalProvider = ({ children }) => {
     initial: 'R'
   })
   const [focusContent, setFocusContent] = useState(1);
+  const [incoming, setIncoming] = useState({});
+  const [callProcess, setCallProcess] = useState({});
+
+  useEffect(() => {
+    if (!callProcess.mode) {
+      const callInformation = {
+        mode: 'incoming',
+        user: user,
+        contact: incoming
+      }
+      setCallProcess(callInformation);
+    }
+  }, [incoming])
 
   return (
     <GlobalContext.Provider
       value={{
-        config,
         user,
         setUser,
         webSocket,
@@ -25,7 +36,9 @@ const GlobalProvider = ({ children }) => {
         focusContact,
         setFocusContact,
         focusContent,
-        setFocusContent
+        setFocusContent,
+        callProcess,
+        setCallProcess
       }}
     >
       {children}

@@ -38,7 +38,7 @@ const Admin = () => {
   }, [webSocket])
 
   return (
-    <div class="container d-flex justify-content-center align-items-center" style={{width: '100%', height: '100%'}}>
+    <div class="flex items-center justify-center w-full h-full">
       {renderCallScreen === false && <Gate setClientID={setClientID}/>}
       {renderCallScreen === true && <AdminCall clientID={clientID} webSocket={webSocket} setClientID={setClientID}/>}
     </div>

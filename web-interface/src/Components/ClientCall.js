@@ -1,8 +1,19 @@
+import { BsDoorOpen } from "react-icons/bs";
+import { FaPhoneAlt } from "react-icons/fa";
+import { IoShieldCheckmark } from "react-icons/io5";
+import { GiRadioactive } from "react-icons/gi";
+import { SlMicrophone } from "react-icons/sl";
+import { ImPhoneHangUp } from "react-icons/im";
+import { BsMicMute } from "react-icons/bs";
+import { FaBluetoothB } from "react-icons/fa";
+import { MdPhonePaused } from "react-icons/md";
+import { BsGrid } from "react-icons/bs";
+import { IoVolumeLowSharp } from "react-icons/io5";
 import { useState, useEffect} from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
-const config = require('../app-config')
+const config = require('../app-config');
 
-const ClientCall = ({clientID, webSocket}) => {
+const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
   const [incall, setIncall] = useState(false);
   const [status, setStatus] = useState('Ringing');
   const [isRecording, setIsRecording] = useState(false);
@@ -131,9 +142,11 @@ const ClientCall = ({clientID, webSocket}) => {
 
   let initRtc = async () => {
     try {
-      await rtcClient.join(config.appId, config.channel, config.token, clientID);
+      await rtcClient.join(config.appId, config.channel, config.token, callProcess.user.user_id);
+      setCallStatus('s');
       setIncall(true);
     } catch(error) {
+      alert(error);
       alert('Error In Joining!');
     }
 
@@ -156,27 +169,115 @@ const ClientCall = ({clientID, webSocket}) => {
   };
 
   return (
-    <div>
-      {incall === false &&
-        <button 
-          class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
-          onClick={initRtc}
-        >
-          Call
-        </button>
-      }
-      {incall === true && 
-        <div>
-          <div style={{textAlign: "center"}}>
-            {status}
+    <div class='w-full h-full'>
+      <div class='flex flex-col w-full h-full'>
+          <div class='w-full h-2/3 pt-28'>
+            <div class='w-full h-full'>
+              <div class='flex flex-row items-center justify-center gap-x-2 mb-24'>
+                <span>
+                  {callStatus === "s" && <IoShieldCheckmark size={35} color="green"/>}
+                  {callStatus === "d" && <GiRadioactive size={35} color="red"/>}
+                </span>
+                <span class='text-3xl text-[#F1F1F1]'>
+                  {callStatus === "e" ? "Now Calling..." : (callStatus === "s" ? "Call Safe" : "Deepfake Detected")}
+                </span>
+              </div>
+              <div class="flex items-center justify-center w-full mb-24">
+                    <img class="w-[200px] h-[200px] border-2 rounded-full overflow-hidden border-blue-500" src={'http://localhost:4000/' + callProcess.contact.avatar} alt='LOGO'/>
+              </div>
+              <div class='text-center text-3xl mb-6 text-[#F1F1F1]'>{callProcess.contact.user_name}</div>
+            </div>
           </div>
-          <button class="btn btn-danger btn-lg btn-group d-flex justify-content-center align-items-center" 
-            onClick={endCall}
-          >
-            End Call
-          </button>
-        </div>
-      }
+          <div class='flex-1 w-full p-3'>
+            {incall === false && 
+              <div class='relative w-full h-full'>
+                <div class='absolute bottom-0 flex items-center justify-center w-full h-2/3'>
+                  <div class='flex flex-row w-full'>
+                    <div class='flex flex-col items-center w-1/2'>
+                      <span onClick={endCall} class='flex-col inline-block mb-2'>
+                        <span class='inline-block rounded-full p-3 bg-red-500'>
+                          <BsDoorOpen size={40} color="white"/>
+                        </span>
+                      </span>
+                      <span className="text-2xl font-bold text-[#F1F1F1]">
+                        Exit
+                      </span>
+                    </div>
+                    <div class='flex flex-col items-center w-1/2'>
+                      <span onClick={initRtc} class='flex-col inline-block mb-2'>
+                        <span class='inline-block rounded-full p-3 bg-[#12E200]'>
+                          <FaPhoneAlt size={40} color="white"/>
+                        </span>
+                      </span>
+                      <span className="text-2xl font-bold text-[#F1F1F1]">
+                        Call
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            {incall === true && 
+              <div class='w-full border-t-2 border-[#484848] pt-3'>
+                <div class='flex flex-row mb-10'>
+                  <div class='flex flex-col items-center w-1/3'>
+                    <span class='flex-col inline-block mb-2'>
+                      <span class='inline-block rounded-full p-1'>
+                        <BsMicMute size={50} color="#908F9D"/>
+                      </span>
+                    </span>
+                    <span className="text-xl font-bold text-[#908F9D]">
+                      Mute
+                    </span>
+                  </div>
+                  <div class='flex flex-col items-center w-1/3'>
+                    <span class='flex-col inline-block mb-2'>
+                      <span class='inline-block rounded-full p-1'>
+                        <FaBluetoothB size={50} color="#908F9D"/>
+                      </span>
+                    </span>
+                    <span className="text-xl font-bold text-[#908F9D]">
+                      Bluetooth
+                    </span>
+                  </div>
+                  <div class='flex flex-col items-center w-1/3'>
+                    <span onClick={endCall} class='flex-col inline-block mb-2'>
+                      <span class='inline-block rounded-full p-1'>
+                        <MdPhonePaused size={50} color="#908F9D"/>
+                      </span>
+                    </span>
+                    <span className="text-xl font-bold text-[#908F9D]">
+                      Hold
+                    </span>
+                  </div>
+                </div>
+                <div class='flex flex-row'>
+                  <div class='flex flex-col items-center justify-center w-1/3'>
+                    <span class='flex-col inline-block mb-2'>
+                      <span class='inline-block p-1'>
+                        <BsGrid size={50} color="grey"/>
+                      </span>
+                    </span>
+                  </div>
+                  <div class='flex flex-col items-center justify-center w-1/3'>
+                    <span onClick={endCall} class='flex-col inline-block mb-2'>
+                      <span class='inline-block rounded-full p-3 bg-red-500'>
+                        <ImPhoneHangUp size={40} color="white"/>
+                      </span>
+                    </span>
+                  </div>
+                  <div class='flex flex-col items-center justify-center w-1/3'>
+                    <span class='flex-col inline-block mb-2'>
+                      <span class='inline-block p-1'>
+                        <IoVolumeLowSharp size={50} color="grey"/>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+      </div>
     </div>
   );
 };

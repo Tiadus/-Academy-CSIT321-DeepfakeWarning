@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
-    <div style={{height: "100vh", width: "100vw"}}>
+    <div class="w-full h-full">
       <Routes>
         <Route index element={<Admin/>} />
         <Route path='client' element={<Client/>} />

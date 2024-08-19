@@ -6,7 +6,7 @@ import { useGlobalContext } from "../context/GlobalStatus";
 
 export default function Incall() {
 
-  const {user} = useGlobalContext();
+  const {user, callProcess, setCallProcess} = useGlobalContext();
   const [viewLoaded, setViewLoaded] = useState(false);
   const webViewRef = useRef(null);
 
@@ -25,7 +25,7 @@ export default function Incall() {
 
   useEffect(() => {
     if (viewLoaded === true) {
-      const message = `${user.user_id}`
+      const message = JSON.stringify(callProcess);
       webViewRef.current.postMessage(message);
     }
   }, [viewLoaded])
@@ -38,10 +38,10 @@ export default function Incall() {
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView className='w-full h-full bg-background-primary'>
       {viewLoaded === false && 
-        <View className='flex-1 justify-center items-center h-full'>
-          <Text className="mb-5 mt-10">Cannot Access Call Feature</Text>
+        <View className='flex-1 justify-center items-center h-full bg-background-primary'>
+          <Text className="mb-5 mt-10 text-text-primary">Loading Call Feature</Text>
           <TouchableOpacity
             className="border-2 rounded border-black p-1 bg-orange-500"
             onPress={() => {
@@ -52,7 +52,7 @@ export default function Incall() {
           </TouchableOpacity>
         </View>
       }
-      <WebView
+      <WebView className='bg-background-primary'
         ref={webViewRef}
         source={{uri: 'http://192.168.56.1:3000/client'}}
         onLoad={()=>{

@@ -4,27 +4,35 @@ import ClientCall from '../Components/ClientCall';
 const app_config = require('../app-config')
 
 const Client = ({}) => {
-  const [webSocket, setWebSocket] = useState(null);
-  const [clientID, setClientID] = useState(0);
-  const [wsError, setWsError] = useState(false);
+  const [webSocket, setWebSocket] = useState({});
+  const [callProcess, setCallProcess] = useState({});
+  const [socketOpen, setSocketOpen] = useState(false);
+  const [callStatus, setCallStatus] = useState('e');
 
   useEffect(() => {
-    const openWebSocket = async (clientID, webSocketID) => {
+    document.addEventListener("message", function (event) {
+      const reactNativeInput = JSON.parse(event.data);
+      setCallProcess(reactNativeInput);
+    });
+  }, []);
+
+  useEffect(() => {
+    const openWebSocket = async (webSocketID) => {
       try {
         const ws = new WebSocket(app_config.server_main_ws);
         ws.onopen = () => {
           ws.send(webSocketID);
-          setClientID(clientID);
+          setSocketOpen(true);
         };
         ws.onmessage = (message) => {
           console.log(message.data);
+          setCallStatus('d');
         }
         ws.onerror = (message) => {
-          setWsError(true);
+          alert(message.data);
         }
         ws.onclose = (message) => {
           alert('Close');
-          setWsError(true);
         }
         setWebSocket(ws);
       } catch (error) {
@@ -32,27 +40,25 @@ const Client = ({}) => {
       }
     }
 
-    document.addEventListener("message", function (event) {
-      const reactNativeInput = event.data.split(',');
-      const clientID = reactNativeInput[0]
-      const webSocketID = '-' + clientID;
+    if (callProcess.mode) {
+      const webSocketID = '-' + callProcess.user.user_id;
       if (isNaN(webSocketID) === true) {
           alert('Invalid Input: ' + webSocketID);
       } else {
           try {
-            openWebSocket(clientID, webSocketID);
+            openWebSocket(webSocketID);
           } catch (error) {
               alert('An Error Has Occured!');
           }
       }
-    });
-  }, []);
+    }
+  }, [callProcess])
 
   return (
-    <div class="container d-flex justify-content-center align-items-center" style={{width: '100%', height: '100%'}}>
-      {wsError === true && 
-        <div>
-          <div>
+    <div class="w-full h-full bg-gradient-to-br from-[#041540] via-[#020003] to-[#041540]">
+      {!webSocket.readyState && 
+        <div class='flex flex-col gap-y-7 items-center justify-center w-full h-full'>
+          <div class='text-2xl text-[#F1F1F1]'>
             Can Not Establish Connection!
           </div>
           <div class="d-flex justify-content-center align-items-center">
@@ -68,7 +74,15 @@ const Client = ({}) => {
           </div>
         </div>
       }
-      {clientID !== 0 && <ClientCall clientID={clientID} webSocket={webSocket} setWebSocket={setWebSocket}/>}
+      {socketOpen === true && 
+        <ClientCall
+          callProcess={callProcess}
+          webSocket={webSocket} 
+          setWebSocket={setWebSocket}
+          callStatus={callStatus}
+          setCallStatus={setCallStatus}
+        />
+      }
     </div>
   );
 };

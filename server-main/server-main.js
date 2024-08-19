@@ -515,9 +515,9 @@ async function runModel(clientID, fileName) {
 
 async function analyse(clientID, message) {
   let processedID = clientID;
-  if (processedID < 0) {
+  /*if (processedID < 0) {
     processedID *= -1;
-  }
+  }*/
   const fileName = await saveAudioRecordToFile(message, processedID);
   await runModel(processedID, fileName);
 }

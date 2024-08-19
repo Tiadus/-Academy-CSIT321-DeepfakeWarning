@@ -6,9 +6,15 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import axios from 'axios';
 
 export default function Info() {
-    const {focusContact, user} = useGlobalContext();
+    const {focusContact, user, setCallProcess} = useGlobalContext();
 
     const handleCallPress = async () => {
+        const callInformation = {
+            mode: 'outgoing',
+            user: user,
+            contact: focusContact
+        }
+        setCallProcess(callInformation);
         router.push('/incall')
     }
 

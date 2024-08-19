@@ -19,7 +19,7 @@ export default function RootLayout() {
             fontWeight: '800', // Font Weight
           },
         }}/>
-        <Stack.Screen name="incall" options={{ headerShown: true }}/>
+        <Stack.Screen name="incall" options={{ headerShown: false }}/>
       </Stack>
     </GlobalStatus>
   );

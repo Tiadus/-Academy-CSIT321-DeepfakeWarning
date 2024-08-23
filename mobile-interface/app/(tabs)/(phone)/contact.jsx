@@ -14,13 +14,13 @@ export default function Contact() {
 
     useEffect(() => {
         if (isFocused == true) {
-            retrieveContacts();
+            retrieveContacts('');
         }
     }, [isFocused])
 
-    const retrieveContacts = async () => {
+    const retrieveContacts = async (name) => {
         try{
-            const contacts = await axios.get('http://localhost:4000/api/contact', {
+            const contacts = await axios.get(`http://localhost:4000/api/contact?name=${name}`, {
               headers: {
                 'Authorization': user.auth,
                 'Content-Type': 'application/json'
@@ -60,6 +60,7 @@ export default function Contact() {
                     className='text-text-primary'
                     placeholder="SEARCH"
                     placeholderTextColor="#F1F1F1"
+                    onChangeText={(value) => retrieveContacts(value)}
                     />
                 </View>
                 <View className='w-full h-2/3'>

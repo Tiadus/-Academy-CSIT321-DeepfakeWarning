@@ -5,9 +5,21 @@ import ContactList from '../../../components/ContactList'
 import { useEffect, useState } from 'react';
 import { useIsFocused } from "@react-navigation/native";
 import axios from 'axios';
+import UserList from '../../../components/UserList'
 
 export default function Search() {
     const [searchedUsers, setSearchedUsers] = useState([]);
+    const [searchedName, setSearchedName] = useState('');
+
+    const retrieveUsers = async () => {
+        try{
+            const users = await axios.get(`http://localhost:4000/api/user?name=${searchedName}`);
+            setSearchedUsers(users.data.users);
+            return;
+          } catch(error) {
+            console.log(error);
+          }
+    }
 
     return (
         <SafeAreaView className='items-center h-full bg-background-primary'>
@@ -18,10 +30,11 @@ export default function Search() {
                         className='text-text-primary'
                         placeholder="SEARCH"
                         placeholderTextColor="#F1F1F1"
+                        onChangeText={(value) => setSearchedName(value)}
                         />
                     </View>
                     <View className='flex-1 rounded-lg'>
-                        <TouchableOpacity className='flex-1 items-center justify-center w-full border-l-4 border-border-outline rounded-lg bg-background-secondary'>
+                        <TouchableOpacity onPress={retrieveUsers} className='flex-1 items-center justify-center w-full border-l-4 border-border-outline rounded-lg bg-background-secondary'>
                             <Ionicons name='search' style={{ fontSize: 40, color: "#F1F1F1" }}/> 
                         </TouchableOpacity>
                     </View>
@@ -32,6 +45,9 @@ export default function Search() {
                             <Ionicons name='search' style={{ fontSize: 150, color: "#767676" }}/>
                             <Text className="text-text-secondary">Search For A User To Connect</Text>
                         </View>
+                    }
+                    {searchedUsers.length > 0 &&
+                        <UserList className='w-full' users={searchedUsers}></UserList>
                     }
                 </View>
             </View>

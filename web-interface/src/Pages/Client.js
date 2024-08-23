@@ -55,7 +55,11 @@ const Client = ({}) => {
   }, [callProcess])
 
   return (
-    <div class="w-full h-full bg-gradient-to-br from-[#041540] via-[#020003] to-[#041540]">
+    <div class="w-full h-full"
+    style={{
+      background: 'linear-gradient(135deg, #0A256A 0%, #020003 50%, #460A6A 100%)',
+    }}
+    >
       {!webSocket.readyState && 
         <div class='flex flex-col gap-y-7 items-center justify-center w-full h-full'>
           <div class='text-2xl text-[#F1F1F1]'>

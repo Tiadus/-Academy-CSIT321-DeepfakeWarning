@@ -115,26 +115,27 @@ app.post('/api/profile', async (req, res) => {
   const userEmail = authenParts[0];
   const userPassword = authenParts[1];
 
+  const mode = req.body.mode;
   const email = req.body.email;
   const user_name = req.body.user_name;
   const avatar = req.body.avatar;
   const phone = req.body.phone;
   const user_password = req.body.user_password;
 
-  if (email === undefined || user_name === undefined || avatar === undefined || phone === undefined || user_password === undefined) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
   try {
       const userController = new User_Controller();
       await userController.authenticateUser(userEmail, userPassword);
-      await userController.userEditProfile(email, user_name, avatar, phone, user_password);
+      const user = await userController.userEditProfile(mode, email, user_name, avatar, phone, userPassword, user_password);
 
-      res.status(200).send({ message: 'Profile Successfully Changed' });
+      res.json({user: user})
   } catch (error) {
+    if (error.status) {
       res.status(error.status).json({error: error.message});
+    } else {
+        const internalServerError = new Error('Internal Server Error');
+        internalServerError = 500;
+        throw internalServerError;
+    }
   }
 });
 

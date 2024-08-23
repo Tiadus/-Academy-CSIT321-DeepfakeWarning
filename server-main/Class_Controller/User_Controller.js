@@ -38,12 +38,58 @@ class User_Controller {
         }
     }
 
-    async userEditProfile(email, user_name, avatar, phone, user_password) {
+    async userEditProfile(mode, email, user_name, avatar, phone, oldPassword, newPassword) {
         try {
-            await this.user.setProfile(email, user_name, avatar, phone, user_password);
-            return 200;
+            if (mode === "profile") {
+                if (email === undefined || user_name === undefined || avatar === undefined || phone === undefined) {
+                    const badRequestError = new Error('Bad Request');
+                    badRequestError.status = 400;
+                    throw badRequestError;
+                }
+                await this.user.setProfile(email, user_name, avatar, phone);
+                const encodedAuthentication = btoa(email + ':' + oldPassword);
+                const auth = `Basic ${encodedAuthentication}`;
+                const newUser = {
+                    user_id: this.user.userID,
+                    email: email,
+                    user_name: user_name,
+                    avatar: avatar,
+                    phone: phone,
+                    auth: auth
+                }
+                return newUser;
+            } else if (mode === "password") {
+                if (newPassword === undefined) {
+                    const badRequestError = new Error('Bad Request');
+                    badRequestError.status = 400;
+                    throw badRequestError;
+                }
+                await this.user.setPassword(newPassword);
+                const encodedAuthentication = btoa(this.user.email + ':' + newPassword);
+                const auth = `Basic ${encodedAuthentication}`;
+                const newUser = {
+                    user_id: this.user.userID,
+                    email: this.user.email,
+                    user_name: this.user.user_name,
+                    avatar: this.user.avatar,
+                    phone: this.user.phone,
+                    auth: auth
+                }
+                return newUser;
+            } else {
+                const badRequestError = new Error('Bad Request');
+                badRequestError.status = 400;
+                throw badRequestError;
+            }
         } catch (error) {
-            throw error;
+            if (error.status) {
+                throw error;
+            } else {
+                console.log(error);
+                const internalServerError = new Error('Internal Server Error');
+                internalServerError.status = 500;
+                throw internalServerError;
+            }
         }
     }
 

@@ -91,19 +91,37 @@ class User {
         }
     }
 
-    async setProfile(email, user_name, avatar, phone, user_password) {
+    async setProfile(email, user_name, avatar, phone) {
         const {pool} = require('../Database.js');
         try {
-            const sql = 'UPDATE APP_USER SET email = ?, user_name = ?, avatar = ?, phone = ?, user_password = ?, modified_by = ? WHERE user_id = ?';
-            const sqlValue = [email, user_name, avatar, phone, user_password, this.userID, this.userID];
+            const sql = 'UPDATE APP_USER SET email = ?, user_name = ?, avatar = ?, phone = ?, modified_by = ? WHERE user_id = ?';
+            const sqlValue = [email, user_name, avatar, phone, this.userID, this.userID];
 
             const updateResult = await pool.query(sql, sqlValue);
 
-            if (updateResult[0].affectedRows === 0) {
-                const error = new Error("Forbidden");
-                error.status = 403;
-                return Promise.reject(error);
+            return 200;
+        }
+        catch(dbError) {
+            if (dbError.code !== undefined && dbError.code === 'ER_DUP_ENTRY') {
+                const error = new Error("Email Already Exist");
+                error.status = 409;
+                throw error; 
+            } else {
+                console.log("Error When Updating User Profile: " + dbError);
+                const error = new Error("Internal Server Error");
+                error.status = 500;
+                throw error;
             }
+        }
+    }
+
+    async setPassword(newPassword) {
+        const {pool} = require('../Database.js');
+        try {
+            const sql = 'UPDATE APP_USER SET user_password = ?, modified_by = ? WHERE user_id = ?';
+            const sqlValue = [newPassword, this.userID, this.userID];
+
+            const updateResult = await pool.query(sql, sqlValue);
 
             return 200;
         }

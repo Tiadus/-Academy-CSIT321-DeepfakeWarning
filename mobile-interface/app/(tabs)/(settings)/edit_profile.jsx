@@ -1,4 +1,4 @@
-import {View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, TextInput} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, TextInput, Alert} from 'react-native';
 import { useGlobalContext } from "../../../context/GlobalStatus";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -16,12 +16,77 @@ export default function Edit_Profile() {
     useEffect(() => {
         if (isFocused == true) {
           try {
-
+            onChangeUserName(user.user_name)
+            onChangeUserEmail(user.email)
+            onChangeUserPhone(user.phone)
           } catch (error) {
             console.log(error);
           }
         }
     }, [isFocused])
+
+    const saveProfile = async () => {
+        if (userName === '' || userEmail === '' || userPhone === '') {
+            Alert.alert(
+              'Warning',
+              'Please Do Not Leave The Information Blank',
+              [
+                { text: 'OK' },
+              ],
+              { cancelable: false }
+            );
+            return;
+        }
+        
+        try {
+            const updateProfileResult = await axios.post('http://localhost:4000/api/profile', {
+                mode: "profile",
+                email: userEmail,
+                user_name: userName,
+                avatar: user.avatar,
+                phone: userPhone
+            }, {
+              headers: {
+                'Authorization': user.auth,
+                'Content-Type': 'application/json'
+              }
+            });
+      
+            const userInfo = updateProfileResult.data.user;
+            userInfo.user_id = updateProfileResult.data.user.user_id.toString();
+            
+            setUser(userInfo);
+
+            Alert.alert(
+                'Message',
+                'Information Has Been Saved',
+                [
+                  { text: 'OK' },
+                ],
+                { cancelable: false }
+              );
+              return;
+          } catch(error) {
+            if (error.response && error.response.status) {
+              let errorStatus = error.response.status;
+              let errorMessage = error.response.data.error;
+              if (errorStatus === 401) {
+                errorMessage = 'Invalid Credential'
+              }
+              Alert.alert(
+                'Warning',
+                errorMessage,
+                [
+                  { text: 'OK' },
+                ],
+                { cancelable: false }
+              );
+              return;
+            } else {
+              console.log(error);
+            }
+          }
+    }
 
     return(
         <KeyboardAwareScrollView 
@@ -81,6 +146,7 @@ export default function Edit_Profile() {
                             <Text className="text-text-primary">Change Password</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
+                            onPress={saveProfile}
                             className="items-center justify-center h-12 rounded-xl mb-4 bg-button-primary"
                         >
                             <Text className="text-text-primary">Save Information</Text>

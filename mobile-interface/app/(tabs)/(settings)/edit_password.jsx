@@ -1,9 +1,10 @@
-import {View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, TextInput} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image, TextInput, Alert} from 'react-native';
 import { useGlobalContext } from "../../../context/GlobalStatus";
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
 import { useIsFocused } from "@react-navigation/native";
+import { router } from "expo-router";
 
 export default function Edit_Password() {
     const isFocused = useIsFocused();
@@ -20,6 +21,78 @@ export default function Edit_Password() {
           }
         }
     }, [isFocused])
+
+    const savePassword = async () => {
+        if (userPassword === '' || userConfirmPassword === '') {
+            Alert.alert(
+              'Warning',
+              'Please Input All Information',
+              [
+                { text: 'OK' },
+              ],
+              { cancelable: false }
+            );
+            return;
+          }
+      
+          if (userPassword != userConfirmPassword) {
+            Alert.alert(
+              'Warning',
+              'Password and Confirmation do not match',
+              [
+                { text: 'OK', },
+              ],
+              { cancelable: false }
+            );
+            return;
+          }
+        
+        try {
+            const updateProfileResult = await axios.post('http://localhost:4000/api/profile', {
+                mode: "password",
+                user_password: userPassword
+            }, {
+              headers: {
+                'Authorization': user.auth,
+                'Content-Type': 'application/json'
+              }
+            });
+      
+            const userInfo = updateProfileResult.data.user;
+            userInfo.user_id = updateProfileResult.data.user.user_id.toString();
+            
+            setUser(userInfo);
+
+            Alert.alert(
+                'Message',
+                'Password Has Been Changed',
+                [
+                  { text: 'OK', onPress: () => {router.back();} },
+                ],
+                { cancelable: false }
+              );
+              return;
+          } catch(error) {
+            if (error.response && error.response.status) {
+              let errorStatus = error.response.status;
+              let errorMessage = error.response.data.error;
+              if (errorStatus === 401) {
+                errorMessage = 'Invalid Credential'
+              }
+              Alert.alert(
+                'Warning',
+                errorMessage,
+                [
+                  { text: 'OK' },
+                ],
+                { cancelable: false }
+              );
+              return;
+            } else {
+              console.log(error);
+            }
+          }
+    }
 
     return(
         <KeyboardAwareScrollView 
@@ -55,6 +128,7 @@ export default function Edit_Password() {
                     </View>
                     <View className="w-full gap-y-4">
                         <TouchableOpacity
+                            onPress={savePassword}
                             className="items-center justify-center h-12 rounded-xl mb-4 bg-button-secondary"
                         >
                             <Text className="text-text-primary">Change Password</Text>

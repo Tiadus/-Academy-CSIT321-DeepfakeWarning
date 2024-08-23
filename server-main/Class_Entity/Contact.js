@@ -67,17 +67,17 @@ class Contact {
         }
     }
 
-    static async getStorerContacts(storer_id) {
+    static async getStorerContacts(storer_id, name) {
         const {pool} = require('../Database.js');
         try {
             const sql1 = "SELECT user_id, email, user_name, avatar, phone"
             const sql2 = "FROM CONTACT JOIN APP_USER ON CONTACT.stored_id = APP_USER.user_id"
-            const sql3 = "WHERE storer_id = ?";
+            const sql3 = "WHERE storer_id = ? AND user_name LIKE ?";
             const sql4 = "ORDER BY APP_USER.user_name ASC";
 
             const sql = [sql1, sql2, sql3, sql4].join(" ");
 
-            const sqlValue = [storer_id];
+            const sqlValue = [storer_id, `%${name}%`];
 
             const queryResult = await pool.query(sql,sqlValue);
 

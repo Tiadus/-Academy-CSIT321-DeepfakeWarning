@@ -159,14 +159,25 @@ app.get('/api/contact', async (req,res) => {
     res.status(badRequestError.status).json({error: badRequestError.message});
   }
 
+  const name = req.query.name;
+  if (name === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
   try {
       const userController = new User_Controller();
       await userController.authenticateUser(userEmail, userPassword);
 
-      const contacts = await userController.getUserContacts();
+      const contacts = await userController.getUserContacts(name);
       res.json({contacts: contacts});
   } catch (error) {
-      res.status(error.status).json({error: error.message});
+      if (error.status) {
+        res.status(error.status).json({error: error.message});
+      } else {
+        res.status(500).json({error: 'Internal Server Error'});
+      }
   }
 });
 
@@ -226,6 +237,28 @@ app.post('/api/contact', async (req,res) => {
     }
   } catch (error) {
     res.status(error.status).json({error: error.message});
+  }
+});
+
+app.get('/api/user', async (req,res) => {
+  const name = req.query.name;
+  if (name === undefined) {
+    const badRequestError = new Error('Bad Request');
+    badRequestError.status = 400;
+    res.status(badRequestError.status).json({error: badRequestError.message});
+  }
+
+  try {
+      const userController = new User_Controller();
+      const users = await userController.userSearchUser(name);
+      res.json({users: users});
+  } catch (error) {
+      if (error.status) {
+        res.status(error.status).json({error: error.message});
+      } else {
+        console.log(error)
+        res.status(500).json({error: 'Internal Server Error'});
+      }
   }
 });
 

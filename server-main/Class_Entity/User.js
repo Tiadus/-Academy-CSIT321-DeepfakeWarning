@@ -67,6 +67,30 @@ class User {
         }
     }
 
+    static async searchUser(name) {
+        const {pool} = require('../Database.js');
+        try {
+            const sql1 = "SELECT user_id, email, user_name, avatar, phone"
+            const sql2 = "FROM APP_USER"
+            const sql3 = "WHERE user_name LIKE ?";
+
+            const sql = [sql1, sql2, sql3].join(" ");
+
+            const sqlValue = [`%${name}%`];
+
+            const queryResult = await pool.query(sql,sqlValue);
+
+            const users = queryResult[0];
+
+            return users;
+        } catch (dbError) {
+            console.log("Error When Getting User From Database: " + dbError);
+            const error = new Error("Internal Server Error");
+            error.status = 500;
+            throw error; 
+        }
+    }
+
     async setProfile(email, user_name, avatar, phone, user_password) {
         const {pool} = require('../Database.js');
         try {

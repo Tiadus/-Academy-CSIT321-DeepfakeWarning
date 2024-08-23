@@ -109,13 +109,22 @@ class User_Controller {
         return initial;
     }
 
-    async getUserContacts() {
+    async getUserContacts(name) {
         try {
-            const contacts = await Contact.getStorerContacts(this.user.userID);
+            const contacts = await Contact.getStorerContacts(this.user.userID, name);
             for (let i = 0; i < contacts.length; i++) {
                 contacts[i].initial = this.getInitial(contacts[i].user_name);
             }
             return contacts;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async userSearchUser(name) {
+        try {
+            const users = await User.searchUser(name);
+            return users;
         } catch (error) {
             throw error;
         }

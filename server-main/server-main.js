@@ -9,7 +9,8 @@ const bodyParser = require('body-parser');
 const WebSocket = require('ws');
 const cors = require('cors');
 const path = require('path');
-
+const fs = require('fs');
+const multer = require('multer');
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -30,6 +31,77 @@ const Education_Controller = require('./Class_Controller/Education_Controller.js
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Ensure the uploads directory exists
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+
+// Set up multer for file upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Directory to save the files
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName); // Naming the file with a unique name
+  },
+});
+
+const upload = multer({ storage });
+
+// Handle file upload
+app.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    // Retrieve the path of the uploaded file
+    const filePath = path.join(uploadDir, req.file.filename);
+
+    const result = await analyseFile(filePath);
+
+    // Send a success response with the file path
+    res.json({
+      message: result
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: 'File upload failed',
+      error: err.message,
+    });
+  }
+});
+
+async function analyseFile(filePath) {
+  const pythonScriptPath = 'main.py';
+
+  const command = `python ${pythonScriptPath} --single_file ${filePath}`;
+
+  try {
+    const { stdout, stderr } = await new Promise((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          reject(`Error analyzing file: ${error.message}`);
+        } else if (stderr) {
+          reject(`Python script error: ${stderr}`);
+        } else {
+          resolve({ stdout, stderr });
+        }
+      });
+    });
+
+    const evaluatedScore = parseFloat(stdout);
+    console.log(`File Uploaded Score: ${evaluatedScore}`);
+
+    if (evaluatedScore > -1.5) {
+      return ('Deepfake');
+    } else {
+      return ('Safe');
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 app.post('/api/register', async (req,res) => {
   const body = req.body;

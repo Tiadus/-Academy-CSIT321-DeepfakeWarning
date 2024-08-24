@@ -133,3 +133,5 @@ dmypy.json
 
 # Audio Files Storage
 audio_files
+
+uploads

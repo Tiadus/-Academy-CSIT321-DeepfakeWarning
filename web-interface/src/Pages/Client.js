@@ -57,7 +57,7 @@ const Client = ({}) => {
   return (
     <div class="w-full h-full"
     style={{
-      background: 'linear-gradient(135deg, #0A256A 0%, #020003 50%, #460A6A 100%)',
+      background: 'linear-gradient(135deg, #0A256A, #0F1A36, #061539)'
     }}
     >
       {!webSocket.readyState && 

@@ -1,22 +1,43 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import AdminInstructionModal from './AdminInstructionModal';
+import axios from 'axios';
 
-const Gate = ({setClientID}) => {
-    const clientIDRef = useRef(null);
+const Gate = ({setUser}) => {
+    const [userEmail, onChangeUserEmail] = useState('');
+    const [userPassword, onChangeUserPassword] = useState('');
     const [modalShow, setModalShow] = useState(false);
 
     const handleLogin = async () => {
-        const clientID = clientIDRef.current.value;
-        if (isNaN(clientID) === false) {
-            if (parseInt(clientID) >= 0) {
-                setClientID(clientID);
-            } else {
-                alert('Invalid Value - Must Be Bigger Or Equal To 0')
-            }
-        } else if (isNaN(clientID) === true) {
-            alert('Invalid Input - Must Be A Number');
+        if (userEmail === '' || userPassword === '') {
+            alert('Please Input All Credential');
         }
-    }
+    
+        const encodedAuthentication = btoa(userEmail + ':' + userPassword);
+        const auth = `Basic ${encodedAuthentication}`
+    
+        try{
+          const loginResult = await axios.post('http://localhost:4000/api/login', {}, {
+            headers: {
+              'Authorization': auth,
+              'Content-Type': 'application/json'
+            }
+          });
+    
+          const user = loginResult.data;
+          user.user_id = loginResult.data.user_id.toString();
+          user.auth = auth;
+          
+          setUser(user);
+        } catch(error) {
+          if (error.response && error.response.status) {
+            let errorMessage = error.response.data.error;
+            alert(errorMessage);
+            return;
+          } else {
+            console.log(error);
+          }
+        }
+      }
 
     return (
         <>
@@ -29,18 +50,27 @@ const Gate = ({setClientID}) => {
                     <img class="w-[200px] h-[200px]" src='LOGO.png' alt='LOGO'/>
                 </div>
                 <input 
-                    ref={clientIDRef}
-                    type="number" 
+                    value={userEmail}
+                    onChange={(e) => {onChangeUserEmail(e.target.value)}}
+                    type="text" 
                     class="form-control mb-3" 
                     style={{textAlign: 'center', borderColor: 'black', borderWidth: '3px', borderStyle: 'solid', borderRadius: '30px'}} 
-                    placeholder="Enter An Identifier"
+                    placeholder="Enter Email"
+                />
+                <input 
+                    value={userPassword}
+                    onChange={(e) => {onChangeUserPassword(e.target.value)}}
+                    type="password" 
+                    class="form-control mb-3" 
+                    style={{textAlign: 'center', borderColor: 'black', borderWidth: '3px', borderStyle: 'solid', borderRadius: '30px'}} 
+                    placeholder="Enter Password"
                 />
                 <div class="d-flex justify-content-center align-items-center mb-3">
                     <button 
                         class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
                         onClick={handleLogin}
                     >
-                        CONNECT AS ADMIN
+                        CONNECT AS USER
                     </button>
                 </div>
                 <div class="d-flex justify-content-center align-items-center">

@@ -1,20 +1,37 @@
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
 import AdminIncallModal from './AdminIncallModal';
-const config = require('../app-config')
+import AdminIncomingModal from './AdminIncomingModal';
+const config = require('../app-config');
 
-const AdminCall = ({clientID, webSocket, setClientID}) => {
+const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
   const [rtcClient, setRtcClient] = useState(null);
-
+  const [contactNumber, setContactNumber] = useState('');
   const [adminCallState, setAdminCallState] = useState({
     localAudioTrack: null,
     remoteAudioTrack: null,
     modalIncallShow: false,
+    modalIncomingShow: false,
     callStatus: 'Ringing',
     mediaRecorder: null,
     interval: null,
     audioInputType: 'mic'
   })
+
+  useEffect(() => {
+    if (incoming !== null) {
+      setAdminCallState(prevState => ({
+        ...prevState,
+        modalIncomingShow: true
+      }))
+    } else if (incoming === null) {
+      setAdminCallState(prevState => ({
+        ...prevState,
+        modalIncomingShow: false
+      }))
+    }
+  }, [incoming])
 
   useEffect(() => {
     if (rtcClient === null) {
@@ -135,22 +152,102 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
             interval: null,
             mediaRecorder: null,
           }))
+          setIncoming(null);
         }
       }
     }
   }, [adminCallState.modalIncallShow]) //NOTE adminCallState.modalIncallShow
 
-  let initRtc = async () => {
-    await rtcClient.join(config.appId, config.channel, config.token, clientID);
+  let initRtc = async (channel) => {
+    await rtcClient.join(config.appId, channel, config.token, user.user_id);
 
     const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
 
     setAdminCallState(prevState => ({
       ...prevState,
       modalIncallShow: true,
+      modalIncomingShow: false,
       localAudioTrack: localAudioTrack,
       audioInputType: 'mic'
     }))
+  }
+
+  const handleInitateCall = async () => {
+    try {
+      if (contactNumber === '') {
+        alert('Input A Number');
+        return;
+      }
+
+      const result = await axios.post('http://localhost:4000/api/communication', {
+        mode: 'initiate',
+        receiver_id: contactNumber,
+      }, {
+        headers: {
+          'Authorization': user.auth,
+          'Content-Type': 'application/json'
+        }
+      });
+      const room_id = result.data.room_id;
+      await initRtc(room_id);
+    } catch (error) {
+      alert(error.response.data.error);
+    }
+  }
+
+  const acceptCall = async (audioType) => {
+    try {
+      await axios.post('http://localhost:4000/api/communication', {
+        mode: 'receive',
+        room_id: incoming.room_id,
+        receiver_action: 'accept'
+      }, {
+        headers: {
+          'Authorization': user.auth,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (audioType === 'mic') {
+        initRtc(incoming.room_id);
+      } else if (audioType === 'file') {
+        handleAnswerWithAudioFile(incoming.room_id)
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const declineCall = async () => {
+    try{
+      await axios.post('http://localhost:4000/api/communication', {
+        mode: 'receive',
+        room_id: incoming.room_id,
+        receiver_action: 'decline'
+      }, {
+        headers: {
+          'Authorization': user.auth,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      setIncoming(null);
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+  const handleReceiveCall = async (receiver_action, audioType) => {
+    switch (receiver_action) {
+      case 'accept':
+        await acceptCall(audioType);
+        break;
+      case 'decline':
+        await declineCall();
+        break;
+      default:
+        break;
+    }
   }
 
   const handleInputSwitchToMicrophone = async () => {
@@ -183,8 +280,8 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
     }))
   }
 
-  const handleAnswerWithAudioFile = async () => {
-    await rtcClient.join(config.appId, config.channel, config.token, clientID);
+  const handleAnswerWithAudioFile = async (channel) => {
+    await rtcClient.join(config.appId, channel, config.token, user.user_id);
 
     const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
       source: '/audiofiles/fake_sample.mp3'
@@ -208,6 +305,7 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
         modalIncallShow: false,
         callStatus: 'Ringing'
       }))
+      setIncoming(null);
     } catch(error) {
       console.log(error);
     }
@@ -215,7 +313,7 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
 
   const handleLogout = () => {
     webSocket.close();
-    setClientID(null);
+    setUser(null);
   };
 
   return (
@@ -223,6 +321,15 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
           class="row gy-3"
           style={{textAlign: 'center'}}
       >
+        <AdminIncomingModal
+          show={adminCallState.modalIncomingShow}
+          status={adminCallState.callStatus}
+          onHide={() => {
+            setIncoming(null);
+          }}
+          incoming={incoming}
+          handleReceiveCall={handleReceiveCall}
+        />
         <AdminIncallModal
           show={adminCallState.modalIncallShow}
           status={adminCallState.callStatus}
@@ -239,11 +346,13 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
         />
         <div class="col-12 d-flex justify-content-center align-items-center">
             <input 
-                type="text" 
+                type="text"
+                value={contactNumber}
+                onChange={(e) => {setContactNumber(e.target.value)}}
                 id="inputField" 
                 class="form-control mb-3" 
                 style={{textAlign: 'center', borderColor: 'violet', borderWidth: '4px', borderStyle: 'solid', borderRadius: '30px'}} 
-                placeholder="Enter A Number"
+                placeholder="Enter A Contact Number"
             />
         </div>
         <div class="col-12 d-flex justify-content-center align-items-center">
@@ -252,7 +361,7 @@ const AdminCall = ({clientID, webSocket, setClientID}) => {
                 class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
                 style={{width: '85%', textAlign: 'center', clear: 'left'}}
                 id="call-button"
-                onClick={initRtc}
+                onClick={handleInitateCall}
             >
               <span>Call</span>
             </button>

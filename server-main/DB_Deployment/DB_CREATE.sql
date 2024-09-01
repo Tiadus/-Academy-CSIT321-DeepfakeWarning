@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS CALL_HISTORY (
     modified_at timestamp default current_timestamp ON UPDATE current_timestamp,
     modified_by int not null,
     constraint CALL_HISTORY_PK primary key (history_id),
+    constraint CALL_HISTORY_CK unique (room_id),
     constraint CALL_HISTORY_FK1 foreign key (sender) references APP_USER(user_id),
     constraint CALL_HISTORY_FK2 foreign key (receiver) references APP_USER(user_id)
 );

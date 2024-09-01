@@ -101,7 +101,7 @@ function generateCallHistory() {
         const status = getRandomInt(0,2);
         const deepfake = getRandomInt(0,1);
         const time = getServerCallTime();
-        const room_id = `C${sender}R${receiver}T${time[0]}${time[1]}${time[3]}${time[4]}${time[5]}${time[6]}`;
+        const room_id = `C${sender}R${receiver}T${time[0]}${time[1]}${time[2]}${time[3]}${time[4]}${time[5]}`;
 
         const aHistory = {
             sender: sender,
@@ -121,7 +121,7 @@ function generateCallHistory() {
         const status = getRandomInt(0,2);
         const deepfake = getRandomInt(0,1);
         const time = getServerCallTime();
-        const room_id = `C${sender}R${receiver}T${time[0]}${time[1]}${time[3]}${time[4]}${time[5]}${time[6]}`;
+        const room_id = `C${sender}R${receiver}T${time[0]}${time[1]}${time[2]}${time[3]}${time[4]}${time[5]}`;
 
         const aHistory = {
             sender: sender,
@@ -155,12 +155,17 @@ async function generateEducation() {
     const lessonName = [
         'Understanding Audio Deepfakes The New Frontier of Fraud',
         'Securing Social Media Accounts A Comprehensive Guide',
-        'Recognizing Fake Websites A Guide to Staying Safe Online'
+        'Recognizing Fake Websites A Guide to Staying Safe Online',
+        'Identifying Phishing Emails Essential Tips for Staying Safe',
+        'Reporting and Blocking Spam Emails and Messages',
+        'Staying Safe Online The Importance of User Awareness',
+        'The Importance of Regular Software Updates',
+        'Understanding Privacy Settings'
     ]
 
     const contentList = [];
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < lessonName.length; i++) {
         const aContent = {
             title: lessonName[i],
             content: await readFile(lessonName[i])

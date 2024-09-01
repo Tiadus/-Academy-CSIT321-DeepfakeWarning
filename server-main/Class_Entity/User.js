@@ -132,6 +132,42 @@ class User {
             throw error;
         }
     }
+
+    static async getReportCount(target_id) {
+        const {pool} = require('../Database.js');
+        try {
+            const sql = 'SELECT COUNT(*) FROM REPORT_LOG WHERE reported_id = ?'
+            const sqlValue = [target_id];
+
+            const queryResult = await pool.query(sql,sqlValue);
+
+            const reportCount = queryResult[0][0]['COUNT(*)'];
+            return reportCount;
+        } catch (dbError) {
+            console.log("Error When Getting Report Count: " + dbError);
+            const error = new Error("Internal Server Error");
+            error.status = 500;
+            throw error;
+        }
+    }
+
+    async getBlockStatus(receiver_id) {
+        const {pool} = require('../Database.js');
+        try {
+            const sql = 'SELECT COUNT(*) FROM BLOCK_LOG WHERE blocked_id = ? AND created_by = ?'
+            const sqlValue = [this.userID, receiver_id];
+
+            const queryResult = await pool.query(sql,sqlValue);
+
+            const blockCount = queryResult[0][0]['COUNT(*)'];
+            return blockCount;
+        } catch (dbError) {
+            console.log("Error When Getting Block Count: " + dbError);
+            const error = new Error("Internal Server Error");
+            error.status = 500;
+            throw error;
+        }
+    }
 }
 
 module.exports = User;

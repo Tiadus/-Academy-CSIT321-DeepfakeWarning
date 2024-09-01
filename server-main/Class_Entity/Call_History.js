@@ -1,13 +1,13 @@
 class Call_History {
-    static async insertCallHistory(sender, receiver, call_date, call_status, deepfake) {
+    static async insertCallHistory(sender, receiver, call_date, call_status, deepfake, room_id) {
         const {pool} = require('../Database.js');
         let connection = null;
         try {
             connection = await pool.getConnection();
             await connection.beginTransaction();
 
-            const sqlRegisterCallHistory = 'INSERT INTO CALL_HISTORY (sender, receiver, call_date, call_status, deepfake) VALUES(?, ?, ?, ?, ?)';
-            const sqlRegisterCallHistoryValue = [sender, receiver, call_date, call_status, deepfake];
+            const sqlRegisterCallHistory = 'INSERT INTO CALL_HISTORY (sender, receiver, call_date, call_status, deepfake, room_id, modified_by) VALUES(?, ?, ?, ?, ?, ?, ?)';
+            const sqlRegisterCallHistoryValue = [sender, receiver, call_date, call_status, deepfake, room_id, sender];
             const callHistoryRegisterResult = await connection.query(sqlRegisterCallHistory, sqlRegisterCallHistoryValue);
             
             connection.commit();
@@ -27,6 +27,36 @@ class Call_History {
             if (connection !== null) {
                 connection.release();
             }
+        }
+    }
+
+    static async updateCallHistory(call_status,  modified_by, room_id) {
+        const {pool} = require('../Database.js');
+        try {
+            const sql = 'UPDATE CALL_HISTORY SET call_status = ?, modified_by = ? WHERE room_id = ?';
+            const queryValue = [call_status,  modified_by, room_id]
+            const sqlUpdateResult = await pool.query(sql,queryValue);
+            return;
+        } catch (dbError) {
+            console.log("Error When Updating Call History: " + dbError);
+            const error = new Error("Internal Server Error");
+            error.status = 500;
+            throw error; 
+        }
+    }
+
+    static async flagCallHistory(deepfake, modified_by, room_id) {
+        const {pool} = require('../Database.js');
+        try {
+            const sql = 'UPDATE CALL_HISTORY SET deepfake = ?, modified_by = ? WHERE room_id = ?';
+            const queryValue = [deepfake,  modified_by, room_id];
+            const sqlUpdateResult = await pool.query(sql,queryValue);
+            return;
+        } catch (dbError) {
+            console.log("Error When Updating Call History: " + dbError);
+            const error = new Error("Internal Server Error");
+            error.status = 500;
+            throw error; 
         }
     }
 

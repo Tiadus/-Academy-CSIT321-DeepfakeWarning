@@ -28,6 +28,7 @@ const { Readable } = require('stream');
 
 const User_Controller = require('./Class_Controller/User_Controller.js');
 const Education_Controller = require('./Class_Controller/Education_Controller.js');
+const Call_History = require('./Class_Entity/Call_History.js');
 
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -237,6 +238,7 @@ app.get('/api/contact', async (req,res) => {
     const badRequestError = new Error('Bad Request');
     badRequestError.status = 400;
     res.status(badRequestError.status).json({error: badRequestError.message});
+    return;
   }
 
   try {
@@ -414,51 +416,6 @@ app.post('/api/user', async (req, res) => {
   }
 });
 
-app.get('/api/call', async (req,res) => {
-  /*const authen = req.headers.authorization;
-  if (authen === undefined) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  const encodedCredential = authen.split(" ")[1];
-  const decodedCredential = atob(encodedCredential);
-
-  const authenParts = decodedCredential.split(":");
-  const userEmail = authenParts[0];
-  const userPassword = authenParts[1];
-
-  if (userEmail === undefined || userPassword === undefined) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  const receiver_id = req.query.id;
-  if (receiver_id === undefined) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  if (isNaN(receiver_id) === true) {
-    const badRequestError = new Error('Bad Request');
-    badRequestError.status = 400;
-    res.status(badRequestError.status).json({error: badRequestError.message});
-  }
-
-  try {
-      const userController = new User_Controller();
-      await userController.authenticateUser(userEmail, userPassword);
-
-      const isBlocked = await userController.checkReceiverBlockedStatus(parseInt(receiver_id));
-      res.json({isBlocked: isBlocked});
-  } catch (error) {
-      res.status(error.status).json({error: error.message});
-  }*/
-});
-
 app.get('/api/statistic', async (req,res) => {
   const authen = req.headers.authorization;
   if (authen === undefined) {
@@ -536,6 +493,38 @@ app.get('/api/education', async (req,res) => {
   }
 });
 
+app.post('/api/communication', async (req,res) => {
+  try {
+    const authen = req.headers.authorization;
+    if (authen === undefined) {
+      res.status(403).json({error: 'Bad Request'});
+    }
+
+    const encodedCredential = authen.split(" ")[1];
+    const decodedCredential = atob(encodedCredential);
+  
+    const authenParts = decodedCredential.split(":");
+    const userEmail = authenParts[0];
+    const userPassword = authenParts[1];
+
+    const body = req.body;
+
+    const userController = new User_Controller();
+    await userController.authenticateUser(userEmail, userPassword);
+
+    const room_id = await userController.handleCommunication(body, clients);
+
+    res.status(200).json({room_id: room_id});
+    
+  } catch (error) {
+    if (error.status) {
+      res.status(error.status).json({error: error.message});
+    } else {
+      res.status(500).json({error: "Internal Server Error"});
+    }
+  }
+}) 
+
 const getServerTime = () => {
   // Get the current date and time
   const currentDate = new Date();
@@ -583,14 +572,14 @@ async function saveAudioRecordToFile(message, clientID) {
   return fileName;
 };
 
-async function runModel(clientID, fileName) {
+async function runModel(clientID, fileName, room_id, deepfake_status) {
   const pythonScriptPath = 'main.py';
 
   const filePath = 'audio_files/' + fileName;
 
   const command = `python ${pythonScriptPath} --single_file ${filePath}`;
 
-  exec(command, (error, stdout, stderr) => {
+  exec(command, async (error, stdout, stderr) => {
       if (error) {
           console.error(`Error analysing file: ${error.message}`);
           return 'Can Not Open File';
@@ -608,10 +597,20 @@ async function runModel(clientID, fileName) {
     
         try{
           clients.forEach((client) => {
-            if (client.id === clientID && client.readyState === WebSocket.OPEN) {    
-              client.send('Deepfake Detected');
+            if (client.id === clientID && client.readyState === WebSocket.OPEN) {
+              const messageObj = {
+                mode: 'analyse',
+                result: 'deepfake'
+              }
+              client.deepfake = true;
+              client.send(JSON.stringify(messageObj));
             }
           });
+
+          if (deepfake_status === false) {
+            await Call_History.flagCallHistory(true, clientID, room_id);
+            console.log(`Call Flagged For User ${clientID} In Room ${room_id}`);
+          }
         } catch (error) {
             console.log('Error occured while transmitting message to client with id: ' + clientID);
         }
@@ -619,13 +618,13 @@ async function runModel(clientID, fileName) {
   });
 };
 
-async function analyse(clientID, message) {
+async function analyse(clientID, message, room_id, deepfake_status) {
   let processedID = clientID;
   /*if (processedID < 0) {
     processedID *= -1;
   }*/
   const fileName = await saveAudioRecordToFile(message, processedID);
-  await runModel(processedID, fileName);
+  await runModel(processedID, fileName, room_id, deepfake_status);
 }
 
 const clients = [];
@@ -634,7 +633,7 @@ wss.on('connection', (ws) => {
   ws.on('message', async (message) => {
     if (isNaN(message) === true) {
       try {
-        analyse(ws.id, message);
+        analyse(ws.id, message, ws.room, ws.deepfake);
       } catch (error) {
         console.log(error.message);
       }

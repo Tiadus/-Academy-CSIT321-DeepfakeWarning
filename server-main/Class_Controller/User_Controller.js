@@ -223,7 +223,7 @@ class User_Controller {
             let deepfakeCallPercentage = '0%';
 
             if (incomingCallHistory.length + outgoingCallHistory.length !== 0) {
-                deepfakeCallPercentage = ((deepfakeCallQuantity / (incomingCallHistory.length + outgoingCallHistory.length)) * 100).toString() + '%';
+                deepfakeCallPercentage = parseInt(((deepfakeCallQuantity / (incomingCallHistory.length + outgoingCallHistory.length)) * 100)).toString() + '%';
             }
 
             return {
@@ -232,7 +232,12 @@ class User_Controller {
                 deepfakeCallPercentage: deepfakeCallPercentage
             };
         } catch (error) {
-            console.log(error);
+            if (error.status) {
+                throw error;
+            } else {
+                console.log(error);
+                throw {status: 500, message: 'Internal Server Error'};
+            }
         }
     }
 
@@ -334,7 +339,7 @@ class User_Controller {
             const caller_section = room_id.split('R')[0];
             const caller_id = parseInt(caller_section.split('C')[1]);
             websockets.forEach((client) => {
-                if (client.id === caller_id && client.readyState === WebSocket.OPEN) {
+                if (client.id === caller_id || client.id === caller_id * -1 && client.readyState === WebSocket.OPEN) {
                     const messageObj = {
                         mode: 'decline',
                     }  

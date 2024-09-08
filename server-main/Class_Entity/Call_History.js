@@ -63,10 +63,10 @@ class Call_History {
     static async getIncomingCallHistory(user_id) {
         const {pool} = require('../Database.js');
         try {
-            const sql1 = "SELECT user_id, email, user_name, avatar, phone, call_date, call_status, deepfake"
+            const sql1 = "SELECT user_id, email, user_name, avatar, phone, call_date, call_status, deepfake, CALL_HISTORY.created_at"
             const sql2 = "FROM CALL_HISTORY JOIN APP_USER ON CALL_HISTORY.sender = APP_USER.user_id"
             const sql3 = "WHERE receiver = ?";
-            const sql4 = "ORDER BY CALL_HISTORY.call_date DESC";
+            const sql4 = "ORDER BY CALL_HISTORY.history_id DESC";
 
             const sql = [sql1, sql2, sql3, sql4].join(" ");
 
@@ -88,10 +88,10 @@ class Call_History {
     static async getOutgoingCallHistory(user_id) {
         const {pool} = require('../Database.js');
         try {
-            const sql1 = "SELECT user_id, email, user_name, avatar, phone, call_date, call_status, deepfake"
+            const sql1 = "SELECT user_id, email, user_name, avatar, phone, call_date, call_status, deepfake, CALL_HISTORY.created_at"
             const sql2 = "FROM CALL_HISTORY JOIN APP_USER ON CALL_HISTORY.receiver = APP_USER.user_id"
             const sql3 = "WHERE sender = ?";
-            const sql4 = "ORDER BY CALL_HISTORY.call_date DESC";
+            const sql4 = "ORDER BY CALL_HISTORY.history_id DESC";
 
             const sql = [sql1, sql2, sql3, sql4].join(" ");
 

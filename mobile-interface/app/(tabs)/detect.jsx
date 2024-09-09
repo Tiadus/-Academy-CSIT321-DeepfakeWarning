@@ -177,7 +177,7 @@ export default function Upload() {
                     <View className='flex-row mt-20 mb-10'>
                         <View className='w-1/2'>
                             <Text className='font-extrabold text-4xl text-text-primary'>
-                                UPLOAD
+                                DETECT
                             </Text>
                         </View>
                         {file !== null &&

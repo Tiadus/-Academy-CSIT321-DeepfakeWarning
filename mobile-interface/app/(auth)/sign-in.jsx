@@ -7,7 +7,7 @@ import { images } from "../../constants";
 import axios from 'axios';
 
 export default function Signin() {
-  const {config, user, setUser, setWebSocket} = useGlobalContext();
+  const {config, user, setUser, setWebSocket, setIncoming} = useGlobalContext();
   const [userEmail, onChangeUserEmail] = useState('');
   const [userPassword, onChangeUserPassword] = useState('');
 
@@ -23,7 +23,14 @@ export default function Signin() {
         };
         
         socket.onmessage = (event) => {
-          console.log('Received message:', event.data);
+          try {
+            const messageObj = JSON.parse(event.data);
+            if (messageObj.mode === 'incoming') {
+              setIncoming(messageObj);
+            }
+          } catch (error) {
+            console.log(error);
+          }
         };
         
         socket.onerror = (error) => {

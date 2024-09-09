@@ -15,7 +15,7 @@ export default function Info() {
             contact: focusContact
         }
         setCallProcess(callInformation);
-        router.push('/incall')
+        //router.push('/incall')
     }
 
     const handleAddContact = async () => {

@@ -33,6 +33,7 @@ export default function Incall() {
   const onMessage = (event) => {
     const message = event.nativeEvent.data;
     if (message === "End Call") {
+      setCallProcess({});
       router.back();
     }
   };

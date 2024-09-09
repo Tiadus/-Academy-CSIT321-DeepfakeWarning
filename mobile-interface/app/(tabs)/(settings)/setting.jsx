@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useGlobalContext } from "../../../context/GlobalStatus"
 
 export default function Setting() {
-    const {user, setUser} = useGlobalContext();
+    const {user, setUser, setIncoming, setCallProcess} = useGlobalContext();
     const {webSocket, setWebSocket} = useGlobalContext();
 
     useEffect(() => {
@@ -25,6 +25,8 @@ export default function Setting() {
             webSocket.close();
         }
         setUser(null);
+        setIncoming({});
+        setCallProcess({});
         router.replace('/');
     }
 

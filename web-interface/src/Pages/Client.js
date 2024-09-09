@@ -17,6 +17,14 @@ const Client = ({}) => {
   }, []);
 
   useEffect(() => {
+    const parseWebsocketMessage = (jsonMessage) => {
+      try {
+        return JSON.parse(jsonMessage);
+      } catch (error) {
+        alert('Error In Parse: ' + error);
+      }
+    }
+
     const openWebSocket = async (webSocketID) => {
       try {
         const ws = new WebSocket(app_config.server_main_ws);
@@ -25,8 +33,15 @@ const Client = ({}) => {
           setSocketOpen(true);
         };
         ws.onmessage = (message) => {
-          console.log(message.data);
-          setCallStatus('d');
+          const messageObj = parseWebsocketMessage(message.data);
+          if (messageObj && messageObj.mode === 'analyse') {
+            setCallStatus('d');
+          } else if (messageObj && messageObj.mode === 'decline') {
+            alert('Call Declined');
+            if(window.ReactNativeWebView) { // ensure window.ReactNativeWebView is there, otherwise, web app might crash if is not there
+              window.ReactNativeWebView.postMessage('End Call');
+            }
+          }
         }
         ws.onerror = (message) => {
           alert(message.data);

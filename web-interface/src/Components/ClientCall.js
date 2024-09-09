@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { BsDoorOpen } from "react-icons/bs";
 import { FaPhoneAlt } from "react-icons/fa";
 import { IoShieldCheckmark } from "react-icons/io5";
@@ -140,25 +141,95 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     }
   }, [audioTracks.localAudioTrack]);
 
-  let initRtc = async () => {
+  let initRtc = async (room_id) => {
     try {
-      await rtcClient.join(config.appId, config.channel, config.token, callProcess.user.user_id);
+      await rtcClient.join(config.appId, room_id, config.token, callProcess.user.user_id);
+
+      //Option To Get The Client Microphone When Communicating Through HTTPS
+      /*const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        setAudioTracks(prevState => ({
+        ...prevState,
+        localAudioTrack: stream
+      }));*/
+
       setCallStatus('s');
       setIncall(true);
     } catch(error) {
       alert(error);
       alert('Error In Joining!');
     }
-
-    //Option To Get The Client Microphone When Communicating Through HTTPS
-    /*const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-    setAudioTracks(prevState => ({
-      ...prevState,
-      localAudioTrack: stream
-    }));*/
   }
 
-  const endCall = () => {
+  const handleInitateCall = async () => {
+    try {
+      const result = await axios.post('http://localhost:4000/api/communication', {
+        mode: 'initiate',
+        receiver_id: callProcess.contact.user_id,
+      }, {
+        headers: {
+          'Authorization': callProcess.user.auth,
+          'Content-Type': 'application/json'
+        }
+      });
+      const room_id = result.data.room_id;
+      await initRtc(room_id);
+    } catch (error) {
+      alert(error.response.data.error);
+    }
+  }
+
+  const handleAcceptCall = async () => {
+    try {
+      await axios.post('http://localhost:4000/api/communication', {
+        mode: 'receive',
+        room_id: callProcess.contact.room_id,
+        receiver_action: 'accept'
+      }, {
+        headers: {
+          'Authorization': callProcess.user.auth,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      initRtc(callProcess.contact.room_id);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleCallProcess = async () => {
+    try {
+      if (callProcess.mode === "outgoing") {
+        await handleInitateCall();
+      } else if (callProcess.mode === "incoming") {
+        await handleAcceptCall();
+      }
+    } catch (error) {
+      alert(error);
+    }
+  }
+
+  const handleDeclineCall = async () => {
+    try{
+      await axios.post('http://localhost:4000/api/communication', {
+        mode: 'receive',
+        room_id: callProcess.contact.room_id,
+        receiver_action: 'decline'
+      }, {
+        headers: {
+          'Authorization': callProcess.user.auth,
+          'Content-Type': 'application/json'
+        }
+      });
+      if(window.ReactNativeWebView) { // ensure window.ReactNativeWebView is there, otherwise, web app might crash if is not there
+        window.ReactNativeWebView.postMessage('End Call');
+      }
+    } catch(error) {
+      alert(error);
+    }
+  }
+ 
+  const handleEndCall = () => {
       if (isRecording === true) {
           setIsRecording(false);
       } else if (isRecording === false) {
@@ -167,6 +238,24 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
           }
       }
   };
+
+  const handleCallTermination = async () => {
+    try {
+      if (incall === false ) {
+        if (callProcess.mode === "outgoing") {
+          if(window.ReactNativeWebView) { //Ensure window.ReactNativeWebView is there to prevent crashing
+            window.ReactNativeWebView.postMessage('End Call');
+          }
+        } else if (callProcess.mode === "incoming") {
+          handleDeclineCall();
+        }
+      } else if (incall === true) {
+        handleEndCall();
+      }
+    } catch (error) {
+      alert(error);
+    }
+  }
 
   return (
     <div class='w-full h-full'>
@@ -179,7 +268,7 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
                   {callStatus === "d" && <GiRadioactive size={35} color="red"/>}
                 </span>
                 <span class='text-3xl text-[#F1F1F1]'>
-                  {callStatus === "e" ? "Now Calling..." : (callStatus === "s" ? "Call Safe" : "Deepfake Detected")}
+                  {callStatus === "e" ? (callProcess.mode === "outgoing" ? "Now Calling..." : "Incoming...") : (callStatus === "s" ? "Call Safe" : "Deepfake Detected")}
                 </span>
               </div>
               <div class="flex items-center justify-center w-full mb-24">
@@ -194,23 +283,24 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
                 <div class='absolute bottom-0 flex items-center justify-center w-full h-2/3'>
                   <div class='flex flex-row w-full'>
                     <div class='flex flex-col items-center w-1/2'>
-                      <span onClick={endCall} class='flex-col inline-block mb-2'>
+                      <span onClick={handleCallTermination} class='flex-col inline-block mb-2'>
                         <span class='inline-block rounded-full p-3 bg-red-500'>
-                          <BsDoorOpen size={40} color="white"/>
+                          {callProcess.mode === "outgoing" && <BsDoorOpen size={40} color="white"/>}
+                          {callProcess.mode === "incoming" && <ImPhoneHangUp size={40} color="white"/>}
                         </span>
                       </span>
                       <span className="text-2xl font-bold text-[#F1F1F1]">
-                        Exit
+                        {callProcess.mode === "outgoing" ? "Exit" : "Decline"}
                       </span>
                     </div>
                     <div class='flex flex-col items-center w-1/2'>
-                      <span onClick={initRtc} class='flex-col inline-block mb-2'>
+                      <span onClick={handleCallProcess} class='flex-col inline-block mb-2'>
                         <span class='inline-block rounded-full p-3 bg-[#12E200]'>
                           <FaPhoneAlt size={40} color="white"/>
                         </span>
                       </span>
                       <span className="text-2xl font-bold text-[#F1F1F1]">
-                        Call
+                      {callProcess.mode === "outgoing" ? "Call" : "Accept"}
                       </span>
                     </div>
                   </div>
@@ -241,7 +331,7 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
                     </span>
                   </div>
                   <div class='flex flex-col items-center w-1/3'>
-                    <span onClick={endCall} class='flex-col inline-block mb-2'>
+                    <span class='flex-col inline-block mb-2'>
                       <span class='inline-block rounded-full p-1'>
                         <MdPhonePaused size={50} color="#908F9D"/>
                       </span>
@@ -260,7 +350,7 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
                     </span>
                   </div>
                   <div class='flex flex-col items-center justify-center w-1/3'>
-                    <span onClick={endCall} class='flex-col inline-block mb-2'>
+                    <span onClick={handleCallTermination} class='flex-col inline-block mb-2'>
                       <span class='inline-block rounded-full p-3 bg-red-500'>
                         <ImPhoneHangUp size={40} color="white"/>
                       </span>

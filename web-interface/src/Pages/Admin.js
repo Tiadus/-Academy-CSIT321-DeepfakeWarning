@@ -10,6 +10,28 @@ const Admin = () => {
   const [user, setUser] = useState(null);
   const [incoming, setIncoming] = useState(null);
 
+  /**
+   * useEffect to manage WebSocket connection for handling incoming calls.
+   * 
+   * This effect establishes a WebSocket connection to the server when a user is logged in.
+   * It sends the user's ID upon successful connection and sets a flag to render the call screen.
+   * 
+   * The effect includes a message parser function that attempts to parse incoming WebSocket messages.
+   * If parsing fails, an alert is displayed with the error.
+   * 
+   * When a message is received, it checks the mode of the message:
+   * - If the mode is 'incoming', it updates the state to reflect an incoming call.
+   * - If the mode is 'decline', it alerts the user that the call has been declined.
+   * 
+   * If the user is logged out (user is null), the WebSocket connection is cleared.
+   * 
+   * Dependencies:
+   * - user: The current logged-in user.
+   * - app_config.server_main_ws: The WebSocket server URL.
+   * - setIncoming: A state setter function to update incoming call state.
+   * - setRenderCallScreen: A state setter function to render the call screen.
+   * - setWebSocket: A state setter function to manage the WebSocket connection.
+   */
   useEffect(() => {
     const parseWebsocketMessage = (jsonMessage) => {
       try {
@@ -45,6 +67,16 @@ const Admin = () => {
     }
   }, [user]);
 
+  /**
+   * useEffect to manage the visibility of the call screen based on WebSocket connection status.
+   * 
+   * This effect checks if the WebSocket connection is null (i.e., disconnected). 
+   * If it is null, it updates the state to hide the call screen by setting `renderCallScreen` to false.
+   * 
+   * Dependencies:
+   * - webSocket: The current WebSocket connection.
+   * - setRenderCallScreen: A state setter function to control the rendering of the call screen.
+   */
   useEffect(() => {
     if (webSocket === null) {
       setRenderCallScreen(false);

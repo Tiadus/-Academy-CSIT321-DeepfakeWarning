@@ -27,6 +27,26 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     remoteAudioTracks: []
   });
   
+  /**
+   * useEffect to manage audio recording based on the `isRecording` state.
+   * 
+   * This effect controls the start and stop of audio recording, as well as 
+   * managing the media recorder and stream resources.
+   * 
+   * - When `isRecording` is `true`:
+   *   - A setInterval is established to stop and start the media recorder 
+   *     every 5 seconds, ensuring continuous recording.
+   * 
+   * - When `isRecording` is `false`:
+   *   - The interval is cleared, and the media recorder is stopped.
+   *   - All audio tracks are stopped and closed, and the stream is also 
+   *     terminated.
+   *   - The RTC client leaves the call, and a message is sent to the 
+   *     React Native WebView indicating that the call has ended.
+   * 
+   * Dependencies: [isRecording] - The effect runs whenever the value of 
+   * `isRecording` changes.
+   */
   useEffect(() => {
     const startRecording = () => {
       if (intervalID === null) {
@@ -76,6 +96,22 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
       }
     }, [isRecording]);
   
+  /**
+   * Function to record an audio stream using the MediaRecorder API.
+   *
+   * This function initializes a MediaRecorder instance with the provided 
+   * audio track and sets up event handlers for data availability and stop events.
+   *
+   * - When data is available, it checks if the WebSocket connection is open
+   *   and sends the recorded audio data through the WebSocket.
+   * 
+   * - On stopping the recording, any placeholder functionality can be added.
+   * 
+   * After starting the media recorder, it updates the state to indicate 
+   * that recording is in progress.
+   * 
+   * @param {MediaStreamTrack} audioTrack - The audio track to be recorded.
+   */
   const recordAudioStream = (audioTrack) => {
     const mediaRecorder = new MediaRecorder(new MediaStream([audioTrack]));
 
@@ -95,6 +131,22 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     setMediaRecorder(mediaRecorder);
   };
   
+  /**
+   * useEffect to manage the initialization of the RTC client and handle user events.
+   * 
+   * This effect is executed once when the component mounts, creating an AgoraRTC client 
+   * for real-time communication and setting up event listeners for user interactions.
+   * 
+   * - On user joined: Placeholder function for handling when a user joins the channel.
+   * 
+   * - On user published: Subscribes to the user's media streams. If the media type is 
+   *   audio, it updates the state to include the remote audio track and plays the track.
+   *   It also sets the call status to 'Incall' and starts recording the audio stream.
+   * 
+   * - On user left: Deletes the user's audio track from the state and stops recording.
+   * 
+   * Dependencies: None - This effect runs only once on component mount.
+   */
   useEffect(() => {
     if (rtcClient === null) {
       const rtcClient = AgoraRTC.createClient({mode:'rtc', codec:'vp8'});
@@ -135,12 +187,33 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     }
   }, []);
   
+  /**
+   * useEffect to publish the local audio track to the RTC client.
+   * 
+   * This effect monitors the `audioTracks.localAudioTrack` state and publishes 
+   * the local audio track to the RTC client when it is not null.
+   * 
+   * Dependencies: [audioTracks.localAudioTrack] - The effect runs whenever 
+   * the local audio track changes.
+   */
   useEffect(() => {
     if (audioTracks.localAudioTrack !== null) {
       rtcClient.publish(audioTracks.localAudioTrack);
     }
   }, [audioTracks.localAudioTrack]);
 
+  /**
+   * Initializes the RTC client for a specified room.
+   * 
+   * This function attempts to join an RTC channel using the AgoraRTC client.
+   * 
+   * - It takes a `room_id` parameter to identify the channel to join.
+   * - On successful join, it sets the call status and marks the call as active.
+   * - If an error occurs during the join process, it alerts the user.
+   * 
+   * Parameters:
+   * - room_id (string): The ID of the room to join.
+   */
   let initRtc = async (room_id) => {
     try {
       await rtcClient.join(config.appId, room_id, config.token, callProcess.user.user_id);
@@ -160,6 +233,19 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     }
   }
 
+  /**
+   * Handles the initiation of a call.
+   * 
+   * This asynchronous function sends a request to the server to initiate a call 
+   * with a specified receiver. Upon successful initiation, it retrieves the 
+   * room ID and initializes the RTC client for that room.
+   * 
+   * - It checks for errors in the request and alerts the user if any occur.
+   * 
+   * Dependencies:
+   * - callProcess.contact.user_id: The ID of the user being called.
+   * - callProcess.user.auth: The authorization token for the user initiating the call.
+   */
   const handleInitateCall = async () => {
     try {
       const result = await axios.post('http://localhost:4000/api/communication', {
@@ -178,6 +264,20 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     }
   }
 
+  /**
+   * Handles the acceptance of an incoming call.
+   * 
+   * This asynchronous function sends a request to the server to accept an 
+   * incoming call and join the corresponding room. Upon successful acceptance,
+   * it initializes the RTC client for that room.
+   * 
+   * - It retrieves the room ID from the call process state.
+   * - It handles errors in the request by logging them to the console.
+   * 
+   * Dependencies:
+   * - callProcess.contact.room_id: The ID of the room being joined.
+   * - callProcess.user.auth: The authorization token for the user accepting the call.
+   */
   const handleAcceptCall = async () => {
     try {
       await axios.post('http://localhost:4000/api/communication', {
@@ -197,6 +297,19 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     }
   }
 
+  /**
+   * Manages the call process based on the call mode.
+   * 
+   * This asynchronous function determines whether the call is outgoing or 
+   * incoming and executes the corresponding function to handle the call:
+   * - If the call is outgoing, it calls `handleInitateCall()` to initiate the call.
+   * - If the call is incoming, it calls `handleAcceptCall()` to accept the call.
+   * 
+   * Errors encountered during the process are caught and displayed as alerts.
+   * 
+   * Dependencies:
+   * - callProcess.mode: Determines the type of call being processed ('outgoing' or 'incoming').
+   */
   const handleCallProcess = async () => {
     try {
       if (callProcess.mode === "outgoing") {
@@ -209,6 +322,20 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
     }
   }
 
+  /**
+   * Handles the process of declining an incoming call.
+   * 
+   * This asynchronous function sends a decline action to the server using an HTTP POST request.
+   * It includes the room ID and user authentication in the request headers. 
+   * If the request is successful, it checks if `window.ReactNativeWebView` is available 
+   * and sends a message to end the call on the client-side.
+   * 
+   * Errors encountered during the process are caught and displayed as alerts.
+   * 
+   * Dependencies:
+   * - callProcess.contact.room_id: The ID of the room associated with the call.
+   * - callProcess.user.auth: The user's authentication token for the request.
+   */
   const handleDeclineCall = async () => {
     try{
       await axios.post('http://localhost:4000/api/communication', {
@@ -239,6 +366,17 @@ const ClientCall = ({callProcess, webSocket, callStatus, setCallStatus}) => {
       }
   };
 
+  /**
+   * Handles the end call process.
+   * 
+   * This function checks the recording state:
+   * - If recording is active (`isRecording === true`), it stops the recording by setting `isRecording` to false.
+   * - If recording is inactive (`isRecording === false`), it checks for the presence of `window.ReactNativeWebView`.
+   *   If available, it sends a message to the WebView to indicate the end of the call.
+   * 
+   * Dependencies:
+   * - isRecording: A boolean that indicates whether the call is currently being recorded.
+   */
   const handleCallTermination = async () => {
     try {
       if (incall === false ) {

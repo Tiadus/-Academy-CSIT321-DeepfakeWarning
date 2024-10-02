@@ -9,6 +9,17 @@ const Client = ({}) => {
   const [socketOpen, setSocketOpen] = useState(false);
   const [callStatus, setCallStatus] = useState('e');
 
+  /**
+   * useEffect to handle incoming messages from a React Native WebView.
+   * 
+   * This effect sets up an event listener for the "message" event, which is triggered when a message
+   * is received from the React Native WebView. The received message is expected to be a JSON string,
+   * which is parsed and used to update the `callProcess` state.
+   * 
+   * Dependency: The effect runs only once when the component mounts (empty dependency array).
+   * 
+   * - `setCallProcess`: A state setter function to update the call process state based on the received message.
+   */
   useEffect(() => {
     document.addEventListener("message", function (event) {
       const reactNativeInput = JSON.parse(event.data);
@@ -16,6 +27,23 @@ const Client = ({}) => {
     });
   }, []);
 
+  /**
+   * useEffect to manage WebSocket connections based on the call process state.
+   * 
+   * This effect sets up a WebSocket connection when `callProcess.mode` is defined. It defines an inner 
+   * function `openWebSocket` that handles the WebSocket connection logic, including:
+   * 
+   * - Connecting to the WebSocket server.
+   * - Sending the user's WebSocket ID when the connection is opened.
+   * - Handling incoming messages to update the call status or alert the user about a declined call.
+   * - Handling errors and connection closure.
+   * 
+   * If `callProcess.mode` is not valid, an alert is triggered. The effect runs whenever the `callProcess` state changes.
+   * 
+   * - `parseWebsocketMessage`: A helper function to parse incoming WebSocket messages and handle parsing errors.
+   * - `setWebSocket`: A state setter function to store the WebSocket instance.
+   * - `setCallStatus`: A state setter function to update the call status based on incoming messages.
+   */
   useEffect(() => {
     const parseWebsocketMessage = (jsonMessage) => {
       try {

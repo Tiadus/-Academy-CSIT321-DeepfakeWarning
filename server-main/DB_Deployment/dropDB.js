@@ -1,6 +1,13 @@
 const {connection} = require('../Database.js');
 const config = require('../db_config');
 
+/**
+ * Drops the specified database if it exists.
+ * 
+ * This function connects to the MySQL server, checks if the database exists,
+ * and drops it if found. It handles errors gracefully and ensures the 
+ * connection is closed properly.
+ */
 async function dropDatabase() {
     let mySQLServer = null;
     try {

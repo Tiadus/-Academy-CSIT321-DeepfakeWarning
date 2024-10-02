@@ -1,12 +1,23 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+/**
+ * Generates a random integer between the specified minimum and maximum values, inclusive.
+ * 
+ * @param {number} min - The minimum integer value (inclusive).
+ * @param {number} max - The maximum integer value (inclusive).
+ * @returns {number} A random integer between min and max, inclusive.
+ */
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Generates a list of users
+ * * @returns {Array<Object>} An array of users.
+ */
 function generateUsers() {
     let userList = [];
 
@@ -49,6 +60,10 @@ function generateUsers() {
     return userList;
 }
 
+/**
+ * Generates a list of contacts for user with id 15
+ * * @returns {Array<Object>} An array of contact objects, each having 'storer' and 'stored' properties.
+ */
 function generateContacts() {
     let contactList = [];
 
@@ -67,6 +82,14 @@ function generateContacts() {
     return contactList;
 }
 
+/**
+ * Retrieves the current server date and time in a formatted array.
+ * 
+ * The function returns an array containing the current year, month, day, hour, 
+ * minute, and second, all as strings formatted to two digits where applicable.
+ * 
+ * @returns {Array<string>} An array with six elements: [year, month, day, hour, minute, second].
+ */
 function getServerCallTime() {
     // Get the current date and time
     const currentDate = new Date();
@@ -82,6 +105,16 @@ function getServerCallTime() {
     return [year, month, day, hour, minute, second];
 }
 
+/**
+ * Generates a call history record for users in a system.
+ *
+ * This function creates a list of call history objects representing calls made 
+ * between a set sender and receivers, including details such as call date, 
+ * call status, and whether deepfake technology was used.
+ * 
+ * @returns {Array<Object>} An array of call history objects, each containing 
+ * the sender, receiver, call date, call status, deepfake status, and room ID.
+ */
 function generateCallHistory() {
     const historyList = [];
 

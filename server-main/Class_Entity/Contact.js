@@ -1,4 +1,13 @@
 class Contact {
+    /**
+     * Creates an instance of the Contact class.
+     *
+     * @param {Object} contactInformation - An object containing contact information.
+     * @param {number} contactInformation.contact_id - The ID of the contact.
+     * @param {number} contactInformation.storer_id - The ID of the user who stores the contact.
+     * @param {number} contactInformation.stored_id - The ID of the user being stored as a contact.
+     * @param {boolean} contactInformation.blocked - Indicates whether the contact is blocked.
+     */
     constructor(contactInformation) {
         this.contact_id = contactInformation.contact_id;
         this.storer_id = contactInformation.storer_id;
@@ -6,6 +15,16 @@ class Contact {
         this.blocked = contactInformation.blocked;
     }
 
+    /**
+     * Inserts a new contact into the CONTACT table.
+     *
+     * @param {number} storer_id - The ID of the user storing the contact.
+     * @param {number} stored_id - The ID of the user being stored as a contact.
+     * @returns {Promise<number>} - Returns the ID of the inserted contact record.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 409 if the contact already exists (duplicate entry).
+     *   - 500 for any internal server error during the database operation.
+     */
     static async insertContact(storer_id, stored_id) {
         const {pool} = require('../Database.js');
         let connection = null;
@@ -43,6 +62,16 @@ class Contact {
         }
     }
 
+    /**
+     * Deletes a contact from the CONTACT table.
+     *
+     * @param {number} storer_id - The ID of the user who stored the contact.
+     * @param {number} stored_id - The ID of the contact to be deleted.
+     * @returns {Promise<number>} - Returns 200 if the deletion was successful.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 403 if the contact does not exist or the deletion is forbidden.
+     *   - 500 for any internal server error during the database operation.
+     */
     static async deleteContact(storer_id, stored_id) {
         const {pool} = require('../Database.js');
         try {
@@ -67,6 +96,15 @@ class Contact {
         }
     }
 
+    /**
+     * Retrieves the contacts stored by a specific user from the CONTACT table.
+     *
+     * @param {number} storer_id - The ID of the user who stored the contacts.
+     * @param {string} name - The name (or part of it) to search for among the stored contacts.
+     * @returns {Promise<Array>} - Returns an array of contact records that match the search criteria.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async getStorerContacts(storer_id, name) {
         const {pool} = require('../Database.js');
         try {
@@ -92,7 +130,14 @@ class Contact {
         }
     }
 
-    //Get the contacts that the user is stored as the receiving end
+    /**
+     * Retrieves the contacts where the user is stored as the receiving end from the CONTACT table.
+     *
+     * @param {number} stored_id - The ID of the user for whom to retrieve stored contacts.
+     * @returns {Promise<Array>} - Returns an array of contact records where the user is the stored contact.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async getStoredContacts(stored_id) {
         const {pool} = require('../Database.js');
         try {

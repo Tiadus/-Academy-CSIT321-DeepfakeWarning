@@ -73,6 +73,22 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+/**
+ * Analyzes a file for deepfake content using a Python script.
+ *
+ * This function executes a Python script that assesses a given file and returns a classification
+ * of the content based on its analysis score.
+ *
+ * @param {string} filePath - The path to the file to be analyzed.
+ *
+ * @throws {Error} Throws an error if:
+ *                  - There is an issue running the Python script or if the script returns an error.
+ *
+ * @returns {Promise<string>} Returns a promise that resolves to a string indicating whether
+ *                            the file is classified as 'Deepfake' or 'Safe'.
+ *                            - Returns 'Deepfake' if the evaluation score is greater than -1.5.
+ *                            - Returns 'Safe' if the evaluation score is less than or equal to -1.5.
+ */
 async function analyseFile(filePath) {
   const pythonScriptPath = 'main.py';
 
@@ -104,6 +120,41 @@ async function analyseFile(filePath) {
   }
 };
 
+/**
+ * @api {post} /api/register Register a new user
+ * @apiName RegisterUser
+ * @apiGroup User
+ *
+ * @apiParam {String} email User's email address.
+ * @apiParam {String} user_name User's chosen username.
+ * @apiParam {String} phone User's phone number.
+ * @apiParam {String} user_password User's password.
+ *
+ * @apiError (400) BadRequest The request is missing required fields.
+ * @apiError (500) InternalServerError An error occurred while registering the user.
+ *
+ * @apiSuccess {Number} newUserID The ID of the newly registered user.
+ *
+ * @apiExample {json} Example usage:
+ * {
+ *     "email": "user@example.com",
+ *     "user_name": "user123",
+ *     "phone": "1234567890",
+ *     "user_password": "password123"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "newUserID": 1
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "Bad Request"
+ *     }
+ */
 app.post('/api/register', async (req,res) => {
   const body = req.body;
   const email = body.email;
@@ -138,6 +189,47 @@ const decodeCredential = (encodedCredential) => {
   }
 }
 
+/**
+ * @api {post} /api/login User Login
+ * @apiName LoginUser
+ * @apiGroup User
+ *
+ * @apiHeader {String} Authorization Basic authentication credentials in the format `Basic <encoded_credentials>`.
+ *
+ * @apiParam {String} email User's email address.
+ * @apiParam {String} password User's password.
+ *
+ * @apiError (400) BadRequest The request is missing required fields or the authorization header.
+ * @apiError (401) Unauthorized Invalid email or password.
+ * @apiError (500) InternalServerError An error occurred while processing the login.
+ *
+ * @apiSuccess {Number} user_id The ID of the authenticated user.
+ * @apiSuccess {String} email The email of the authenticated user.
+ * @apiSuccess {String} user_name The username of the authenticated user.
+ * @apiSuccess {String} avatar The avatar URL of the authenticated user.
+ * @apiSuccess {String} phone The phone number of the authenticated user.
+ *
+ * @apiExample {json} Example usage:
+ * {
+ *   "Authorization": "Basic dXNlckBleGFtcGxlLmNvbTpwYXNzd29yZDEyMw=="
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "user_id": 1,
+ *       "email": "user@example.com",
+ *       "user_name": "user123",
+ *       "avatar": "user1.jpg",
+ *       "phone": "1234567890"
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Unauthorized
+ *     {
+ *       "error": "Unauthorized"
+ *     }
+ */
 app.post('/api/login', async (req,res) => {
   const authen = req.headers.authorization;
   if (authen === undefined) {
@@ -175,6 +267,57 @@ app.post('/api/login', async (req,res) => {
   }
 });
 
+/**
+ * @api {post} /api/profile Update User Profile
+ * @apiName UpdateUserProfile
+ * @apiGroup User
+ *
+ * @apiHeader {String} Authorization Basic authentication credentials in the format `Basic <encoded_credentials>`.
+ *
+ * @apiParam {String} mode Operation mode: `edit` for editing the profile.
+ * @apiParam {String} [email] New email address (optional).
+ * @apiParam {String} [user_name] New username (optional).
+ * @apiParam {String} [avatar] New avatar URL (optional).
+ * @apiParam {String} [phone] New phone number (optional).
+ * @apiParam {String} [user_password] Current password for verification (optional).
+ * @apiParam {String} [user_password] New password (optional).
+ *
+ * @apiError (400) BadRequest The request is missing required fields or the authorization header.
+ * @apiError (401) Unauthorized Invalid email or password.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess {Object} user The updated user object.
+ *
+ * @apiExample {json} Example usage:
+ * {
+ *   "Authorization": "Basic dXNlckBleGFtcGxlLmNvbTpwYXNzd29yZDEyMw==",
+ *   "mode": "edit",
+ *   "email": "new_email@example.com",
+ *   "user_name": "new_username",
+ *   "avatar": "new_avatar.jpg",
+ *   "phone": "0987654321",
+ *   "user_password": "current_password",
+ *   "user_password": "new_password"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "user": {
+ *         "user_id": 1,
+ *         "email": "new_email@example.com",
+ *         "user_name": "new_username",
+ *         "avatar": "new_avatar.jpg",
+ *         "phone": "0987654321"
+ *       }
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "Bad Request"
+ *     }
+ */
 app.post('/api/profile', async (req, res) => {
   const authen = req.headers.authorization;
   if (authen === undefined) {
@@ -212,6 +355,53 @@ app.post('/api/profile', async (req, res) => {
   }
 });
 
+/**
+ * @api {get} /api/contact Get User Contacts
+ * @apiName GetUserContacts
+ * @apiGroup User
+ *
+ * @apiHeader {String} Authorization Basic authentication credentials in the format `Basic <encoded_credentials>`.
+ *
+ * @apiParam {String} name The name to search for in the user's contacts.
+ *
+ * @apiError (400) BadRequest The request is missing required fields or the authorization header.
+ * @apiError (401) Unauthorized. Invalid email or password.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess {Object[]} contacts List of contacts matching the search criteria.
+ * @apiSuccess {String} contacts.user_id The ID of the contact.
+ * @apiSuccess {String} contacts.user_name The name of the contact.
+ * @apiSuccess {String} contacts.avatar The avatar URL of the contact.
+ *
+ * @apiExample {json} Example usage:
+ * {
+ *   "Authorization": "Basic dXNlckBleGFtcGxlLmNvbTpwYXNzd29yZDEyMw==",
+ *   "name": "John"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "contacts": [
+ *         {
+ *           "user_id": 1,
+ *           "user_name": "John Doe",
+ *           "avatar": "john_doe.jpg"
+ *         },
+ *         {
+ *           "user_id": 2,
+ *           "user_name": "John Smith",
+ *           "avatar": "john_smith.jpg"
+ *         }
+ *       ]
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 401 Unauthorized
+ *     {
+ *       "error": "Unauthorized"
+ *     }
+ */
 app.get('/api/contact', async (req,res) => {
   const authen = req.headers.authorization;
   if (authen === undefined) {
@@ -256,6 +446,41 @@ app.get('/api/contact', async (req,res) => {
   }
 });
 
+/**
+ * @api {post} /api/contact Manage User Contacts
+ * @apiName ManageUserContacts
+ * @apiGroup User
+ *
+ * @apiHeader {String} Authorization Basic authentication credentials in the format `Basic <encoded_credentials>`.
+ *
+ * @apiParam {String} mode The mode of operation: either `add` to add a contact or `del` to delete a contact.
+ * @apiParam {Number} contact_id The ID of the contact to be added or deleted.
+ *
+ * @apiError (400) BadRequest The request is missing required fields or the authorization header.
+ * @apiError (401) Unauthorized Invalid email or password.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess (200) {String} message Confirmation message of the action performed.
+ *
+ * @apiExample {json} Example usage:
+ * {
+ *   "Authorization": "Basic dXNlckBleGFtcGxlLmNvbTpwYXNzd29yZDEyMw==",
+ *   "mode": "add",
+ *   "contact_id": 123
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "message": "Contact Successfully Added"
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "Bad Request"
+ *     }
+ */
 app.post('/api/contact', async (req,res) => {
   try {
     const authen = req.headers.authorization;
@@ -315,6 +540,44 @@ app.post('/api/contact', async (req,res) => {
   }
 });
 
+/**
+ * @api {get} /api/user Search Users
+ * @apiName SearchUsers
+ * @apiGroup User
+ *
+ * @apiParam {String} name The name of the user to search for.
+ *
+ * @apiError (400) BadRequest The request is missing the required `name` query parameter.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess (200) {Object[]} users List of users matching the search criteria.
+ *
+ * @apiExample {curl} Example usage:
+ *     curl -X GET "http://example.com/api/user?name=John"
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "users": [
+ *         {
+ *           "user_id": 1,
+ *           "user_name": "John Doe",
+ *           "email": "john@example.com"
+ *         },
+ *         {
+ *           "user_id": 2,
+ *           "user_name": "Johnny Appleseed",
+ *           "email": "johnny@example.com"
+ *         }
+ *       ]
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "Bad Request"
+ *     }
+ */
 app.get('/api/user', async (req,res) => {
   const name = req.query.name;
   if (name === undefined) {
@@ -337,6 +600,35 @@ app.get('/api/user', async (req,res) => {
   }
 });
 
+/**
+ * @api {post} /api/user Manage User Actions
+ * @apiName ManageUserActions
+ * @apiGroup User
+ *
+ * @apiHeader {String} Authorization Basic authentication header.
+ *
+ * @apiParam {String} mode The action to perform (`block` or `report`).
+ * @apiParam {Number} contact_id The ID of the contact to block or report.
+ * @apiParam {Number} [blockStatus] The status for blocking the contact (1 for block, 0 for unblock).
+ *
+ * @apiError (400) BadRequest The request is missing required parameters or contains invalid data.
+ * @apiError (401) Failed Authentication. Invalid Credential.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess (200) {String} message Success message indicating the action was performed.
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "message": "Block Status Successfully Changed"
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "Bad Request"
+ *     }
+ */
 app.post('/api/user', async (req, res) => {
   try {
     const authen = req.headers.authorization;
@@ -416,6 +708,40 @@ app.post('/api/user', async (req, res) => {
   }
 });
 
+/**
+ * @api {get} /api/statistic Get User Statistics
+ * @apiName GetUserStatistics
+ * @apiGroup Statistic
+ *
+ * @apiHeader {String} Authorization Basic authentication header.
+ *
+ * @apiError (400) BadRequest The request is missing required parameters or contains invalid data.
+ * @apiError (403) Failed Authentication. Invalid Credential.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess (200) {Object} statistic The statistics of the authenticated user.
+ * @apiSuccess (200) {Number} statistic.calls Total number of calls made by the user.
+ * @apiSuccess (200) {Number} statistic.contacts Total number of contacts for the user.
+ * @apiSuccess (200) {Number} statistic.blocked_contacts Total number of blocked contacts.
+ * @apiSuccess (200) {Number} statistic.reported_contacts Total number of reported contacts.
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "statistic": {
+ *         "calls": 10,
+ *         "contacts": 50,
+ *         "blocked_contacts": 5,
+ *         "reported_contacts": 2
+ *       }
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "Bad Request"
+ *     }
+ */
 app.get('/api/statistic', async (req,res) => {
   const authen = req.headers.authorization;
   if (authen === undefined) {
@@ -448,6 +774,52 @@ app.get('/api/statistic', async (req,res) => {
   }
 });
 
+/**
+ * @api {get} /api/education Get Educational Titles or Content
+ * @apiName GetEducationalData
+ * @apiGroup Education
+ *
+ * @apiParam {String} mode The mode of the request, either 'title' or 'content'.
+ * @apiParam {Number} [id] The ID of the educational content (required if mode is 'content').
+ *
+ * @apiError (400) BadRequest The request is missing required parameters or contains invalid data.
+ * @apiError (401) Failed Authentication. Invalid Credential.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess (200) {Object[]} titles List of educational titles.
+ * @apiSuccess (200) {Object} contentBody The educational content corresponding to the given ID.
+ *
+ * @apiExample {curl} Example usage for getting titles:
+ *     curl -X GET "http://example.com/api/education?mode=title"
+ *
+ * @apiExample {curl} Example usage for getting content:
+ *     curl -X GET "http://example.com/api/education?mode=content&id=1"
+ *
+ * @apiSuccessExample {json} Success-Response for titles:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "titles": [
+ *         {"id": 1, "title": "Introduction to Programming"},
+ *         {"id": 2, "title": "Advanced JavaScript"}
+ *       ]
+ *     }
+ *
+ * @apiSuccessExample {json} Success-Response for content:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "contentBody": {
+ *         "id": 1,
+ *         "title": "Introduction to Programming",
+ *         "body": "This course covers the cybersecurity."
+ *       }
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+ *     HTTP/1.1 400 Bad Request
+ *     {
+ *       "error": "Bad Request"
+ *     }
+ */
 app.get('/api/education', async (req,res) => {
   const mode = req.query.mode;
   const id = req.query.id;
@@ -493,11 +865,47 @@ app.get('/api/education', async (req,res) => {
   }
 });
 
+/**
+ * @api {post} /api/communication Manage User Communication
+ * @apiName PostCommunication
+ * @apiGroup Communication
+ *
+ * @apiHeader {String} Authorization Bearer <token> for user authentication.
+ *
+ * @apiParam {Object} body The body of the request containing communication details.
+ * @apiParam {String} body.mode The mode of communication (`initiate` or `receive`).
+ * @apiParam {Number} [body.receiver_id] The ID of the receiver (required for `initiate`).
+ * @apiParam {Number} [body.room_id] The ID of the communication room (required for `receive`).
+ * @apiParam {String} [body.receiver_action] Action for the receiver (required for `receive`).
+ *
+ * @apiError (400) Bad request due to missing parameters.
+ * @apiError (500) InternalServerError An error occurred while processing the request.
+ *
+ * @apiSuccess (200) {String} room_id The ID of the communication room established.
+ *
+ * @apiExample {curl} Example usage:
+ *     curl -X POST "http://example.com/api/communication" \
+ *     -H "Authorization: Bearer <token>" \
+ *     -d '{"mode":"initiate", "receiver_id": 123}'
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *     HTTP/1.1 200 OK
+ *     {
+ *       "room_id": "abcd1234"
+ *     }
+ *
+ * @apiErrorExample {json} Error-Response:
+
+ *     HTTP/1.1 500 Internal Server Error
+ *     {
+ *       "error": "Internal Server Error"
+ *     }
+ */
 app.post('/api/communication', async (req,res) => {
   try {
     const authen = req.headers.authorization;
     if (authen === undefined) {
-      res.status(403).json({error: 'Bad Request'});
+      res.status(400).json({error: 'Bad Request'});
     }
 
     const encodedCredential = authen.split(" ")[1];
@@ -525,6 +933,17 @@ app.post('/api/communication', async (req,res) => {
   }
 }) 
 
+/**
+ * Retrieves the current server date and time.
+ *
+ * @returns {Object} - An object containing the current year, month, day, hour, minute, and second.
+ * @returns {number} return.year - The current year.
+ * @returns {string} return.month - The current month (zero-padded).
+ * @returns {string} return.day - The current day of the month (zero-padded).
+ * @returns {string} return.hour - The current hour (zero-padded).
+ * @returns {string} return.minute - The current minute (zero-padded).
+ * @returns {string} return.second - The current second (zero-padded).
+ */
 const getServerTime = () => {
   // Get the current date and time
   const currentDate = new Date();
@@ -547,6 +966,12 @@ const getServerTime = () => {
   })
 };
 
+/**
+ * Saves an audio record to a file in FLAC format.
+ * @param {string} message - The audio message in binary format.
+ * @param {string} clientID - The ID of the client uploading the audio.
+ * @returns {Promise<string>} A promise that resolves with the file name of the saved audio.
+ */
 async function saveAudioRecordToFile(message, clientID) {
   const serverTime = getServerTime();
 

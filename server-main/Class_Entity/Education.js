@@ -1,4 +1,11 @@
 class Education {
+    /**
+     * Retrieves the list of educational titles from the EDUCATION table.
+     *
+     * @returns {Promise<Array>} - Returns an array of objects containing education_id and title.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async getTitle() {
         const {pool} = require('../Database.js');
         try {
@@ -22,6 +29,14 @@ class Education {
         }
     }
 
+    /**
+     * Retrieves the content for a specific educational record from the EDUCATION table.
+     *
+     * @param {number} education_id - The ID of the education record to retrieve.
+     * @returns {Promise<Object>} - Returns the educational record corresponding to the specified ID.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async getContent(education_id) {
         const {pool} = require('../Database.js');
         try {

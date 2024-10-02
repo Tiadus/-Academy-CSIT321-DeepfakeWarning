@@ -1,4 +1,17 @@
 class Call_History {
+    /**
+     * Inserts a call history record into the CALL_HISTORY table.
+     *
+     * @param {number} sender - The ID of the user initiating the call.
+     * @param {number} receiver - The ID of the user receiving the call.
+     * @param {Date} call_date - The date and time of the call.
+     * @param {string} call_status - The status of the call (e.g., 'completed', 'missed').
+     * @param {boolean} deepfake - Indicates whether the call involved deepfake technology.
+     * @param {string} room_id - The ID of the room used for the call.
+     * @returns {Promise<number>} - Returns the ID of the inserted call history record.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async insertCallHistory(sender, receiver, call_date, call_status, deepfake, room_id) {
         const {pool} = require('../Database.js');
         let connection = null;
@@ -30,6 +43,16 @@ class Call_History {
         }
     }
 
+    /**
+     * Updates the status of a call in the CALL_HISTORY table.
+     *
+     * @param {string} call_status - The new status of the call (e.g., 'completed', 'missed').
+     * @param {number} modified_by - The ID of the user making the update.
+     * @param {string} room_id - The ID of the room associated with the call.
+     * @returns {Promise<void>} - Returns nothing if the update was successful.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async updateCallHistory(call_status,  modified_by, room_id) {
         const {pool} = require('../Database.js');
         try {
@@ -45,6 +68,16 @@ class Call_History {
         }
     }
 
+    /**
+     * Flags a call in the CALL_HISTORY table as involving deepfake technology.
+     *
+     * @param {boolean} deepfake - Indicates whether the call involves deepfake technology.
+     * @param {number} modified_by - The ID of the user making the update.
+     * @param {string} room_id - The ID of the room associated with the call.
+     * @returns {Promise<void>} - Returns nothing if the update was successful.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async flagCallHistory(deepfake, modified_by, room_id) {
         const {pool} = require('../Database.js');
         try {
@@ -60,6 +93,14 @@ class Call_History {
         }
     }
 
+    /**
+     * Retrieves the incoming call history for a specific user from the CALL_HISTORY table.
+     *
+     * @param {number} user_id - The ID of the user for whom to retrieve incoming call history.
+     * @returns {Promise<Array>} - Returns an array of call history records for the specified user.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async getIncomingCallHistory(user_id) {
         const {pool} = require('../Database.js');
         try {
@@ -85,6 +126,14 @@ class Call_History {
         }
     }
 
+    /**
+     * Retrieves the outgoing call history for a specific user from the CALL_HISTORY table.
+     *
+     * @param {number} user_id - The ID of the user for whom to retrieve outgoing call history.
+     * @returns {Promise<Array>} - Returns an array of call history records for the specified user.
+     * @throws {Error} - Throws an error with specific status codes:
+     *   - 500 for any internal server error during the database operation.
+     */
     static async getOutgoingCallHistory(user_id) {
         const {pool} = require('../Database.js');
         try {

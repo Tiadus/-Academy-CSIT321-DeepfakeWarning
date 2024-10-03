@@ -33,21 +33,7 @@ interface, mobile-interface. In each of the terminal, use the command:
 
 Application Configuration Setup 
 In the project folder, create a file name "app-config.js" with the file content as below: 
-	const server_main_port = 4000; 
-	const server_main_ws = 'ws://localhost:' + server_main_port; 
-	const server_main_http = 'http://localhost/:' + server_main_port; 
-	const Agora_AppID = 'APP_ID'; //Your Agora App ID 
-	const Agora_Token = null; 
-	const Agora_Channel = 'main' 
-	const config = { 
-		server_main_port: server_main_port, 
-		server_main_ws: server_main_ws, 
-		server_main_http: server_main_http, 
-		appId: Agora_AppID, 
-		token: Agora_Token, 
-		channel: Agora_Channel 
-	}
-	module.exports = config;
+![image](https://github.com/user-attachments/assets/3f496f5c-dd17-4b22-be78-d9e139ab75ed)
 
 After creating the "app-config.js" in the main folder, copy that file. 
 Navigate to the folder "server-main", paste the config file in it. 

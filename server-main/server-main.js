@@ -33,10 +33,23 @@ const Call_History = require('./Class_Entity/Call_History.js');
 // Serve static files from the 'public' directory
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Ensure the audio files directory exists to store audio from conversation for analysis
+const audioFileDir = path.join(__dirname, 'audio_files');
+if (!fs.existsSync(audioFileDir)) {
+  fs.mkdirSync(audioFileDir);
+}
+
 // Ensure the uploads directory exists
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
+}
+
+// Check if the log file exists, create it if not
+if (!fs.existsSync('log.txt')) {
+  // File doesn't exist, create it
+  fs.writeFileSync('log.txt', '');
+  console.log('File created!');
 }
 
 // Set up multer for file upload
@@ -1043,22 +1056,9 @@ async function runModel(clientID, fileName, room_id, deepfake_status) {
         console.log(`File ${fileName} is safe with score = ${parseFloat(evaluatedScore)}`);
       }
 
-      // Check if the file exists, create it if not
-      if (!fs.existsSync('log.txt')) {
-        // File doesn't exist, create it
-        fs.writeFileSync('log.txt', '');
-        console.log('File created!');
-      }
-
-      // Append data to the file
+      // Append data to the file if the user has id 1 (The Victim)
       try {
         if (clientID == 1) {
-          // Check if the file exists, create it if not
-          if (!fs.existsSync('log.txt')) {
-            // File doesn't exist, create it
-            fs.writeFileSync('log.txt', '');
-            console.log('File created!');
-          }
           const dataToAppend = `${clientID}:${fileName}:${evaluatedScore}\n`;
           fs.appendFileSync('log.txt', dataToAppend);
           console.log('Data appended to file!');

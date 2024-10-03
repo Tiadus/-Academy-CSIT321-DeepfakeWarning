@@ -1,6 +1,6 @@
 const { exec } = require('child_process');
 
-const APP_CONFIG = require('../app-config');
+const APP_CONFIG = require('./server-main-config.js');
 const server_main_port = APP_CONFIG.server_main_port;
 
 const http = require('http');
@@ -110,7 +110,7 @@ async function analyseFile(filePath) {
     const evaluatedScore = parseFloat(stdout);
     console.log(`File Uploaded Score: ${evaluatedScore}`);
 
-    if (evaluatedScore > -1.5) {
+    if (evaluatedScore > APP_CONFIG.model_file_boundary) {
       return ('Deepfake');
     } else {
       return ('Safe');
@@ -1017,7 +1017,7 @@ async function runModel(clientID, fileName, room_id, deepfake_status) {
 
       const evaluatedScore = parseFloat(stdout);
 
-      if (parseFloat(evaluatedScore) > 1.5) {
+      if (parseFloat(evaluatedScore) > APP_CONFIG.model_conversation_boundary) {
         console.log(`File ${fileName} is suspected of deepfake with score = ${parseFloat(evaluatedScore)}`);
     
         try{
@@ -1039,6 +1039,32 @@ async function runModel(clientID, fileName, room_id, deepfake_status) {
         } catch (error) {
             console.log('Error occured while transmitting message to client with id: ' + clientID);
         }
+      } else {
+        console.log(`File ${fileName} is safe with score = ${parseFloat(evaluatedScore)}`);
+      }
+
+      // Check if the file exists, create it if not
+      if (!fs.existsSync('log.txt')) {
+        // File doesn't exist, create it
+        fs.writeFileSync('log.txt', '');
+        console.log('File created!');
+      }
+
+      // Append data to the file
+      try {
+        if (clientID == 1) {
+          // Check if the file exists, create it if not
+          if (!fs.existsSync('log.txt')) {
+            // File doesn't exist, create it
+            fs.writeFileSync('log.txt', '');
+            console.log('File created!');
+          }
+          const dataToAppend = `${clientID}:${fileName}:${evaluatedScore}\n`;
+          fs.appendFileSync('log.txt', dataToAppend);
+          console.log('Data appended to file!');
+        }
+      } catch (error) {
+        console.log(error)
       }
   });
 };

@@ -48,6 +48,19 @@ export default function Signin() {
     }
   }, [user]);
   
+  /**
+   * Handles user login by sending a POST request to the server.
+   *
+   * This function checks if the email and password fields are filled in,
+   * encodes the credentials for basic authentication, and sends a request
+   * to the login API. If the login is successful, the user information is 
+   * saved. If there are errors during the process, appropriate alerts are shown.
+   * 
+   * @async
+   * @function handleLogin
+   * @returns {Promise<void>} Resolves once the user is logged in or an error is handled.
+   * @throws Will show alerts for empty credentials, invalid credentials, or other errors.
+   */
   const handleLogin = async () => {
     if (userEmail === '' || userPassword === '') {
       Alert.alert(

@@ -16,6 +16,7 @@ const GlobalProvider = ({ children }) => {
   const [incoming, setIncoming] = useState({});
   const [callProcess, setCallProcess] = useState({});
 
+  // Set current call process to incoming if theres no current call process
   useEffect(() => {
     if (!callProcess.mode && user !== null) {
       const callInformation = {
@@ -27,6 +28,7 @@ const GlobalProvider = ({ children }) => {
     }
   }, [incoming])
 
+  // Navigate to incall screen upon a change in call process information
   useEffect(() => {
     if (callProcess.mode) {
       router.push('/incall');

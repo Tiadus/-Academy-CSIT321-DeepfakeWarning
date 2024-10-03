@@ -9,6 +9,7 @@ export default function Content() {
     const {focusContent} = useGlobalContext();
     const [content, setContent] = useState({content: 'Fetching Content'});
 
+    //Reset the screen upon focus
     useEffect(() => {
         if (isFocused == true) {
           try {
@@ -19,6 +20,19 @@ export default function Content() {
         }
     }, [isFocused])
 
+    /**
+     * Retrieves the content body from the server based on the specified ID.
+     *
+     * This function sends a GET request to the API to fetch the content body
+     * associated with a specific education ID. If the request is successful, 
+     * the content body is stored in the state. In case of an error, the error 
+     * is logged to the console.
+     * 
+     * @async
+     * @function retrieveContentBody
+     * @returns {Promise<void>} Resolves once the content body is retrieved or an error is handled.
+     * @throws Will log errors to the console if the request fails.
+     */
     const retrieveContentBody = async () => {
         try{
             const contentRequestResult = await axios.get(`http://localhost:4000/api/education?mode=content&id=${focusContent}`);

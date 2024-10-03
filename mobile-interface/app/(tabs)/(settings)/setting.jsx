@@ -8,6 +8,7 @@ export default function Setting() {
     const {user, setUser, setIncoming, setCallProcess} = useGlobalContext();
     const {webSocket, setWebSocket} = useGlobalContext();
 
+    //Reset the user once disconnected
     useEffect(() => {
         if (user === null) {
             setWebSocket(null);
@@ -20,6 +21,7 @@ export default function Setting() {
     }
     }, [webSocket]);
 
+    //Handle logout process
     const handleLogout = async () => {
         if (webSocket) {
             webSocket.close();

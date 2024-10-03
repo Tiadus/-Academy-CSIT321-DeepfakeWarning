@@ -8,6 +8,10 @@ import axios from 'axios';
 export default function Info() {
     const {focusContact, user, setCallProcess} = useGlobalContext();
 
+    /**
+    * Handle when the user press the call button
+    * Set the current call process to the receiver
+    */
     const handleCallPress = async () => {
         const callInformation = {
             mode: 'outgoing',
@@ -18,6 +22,9 @@ export default function Info() {
         //router.push('/incall')
     }
 
+    /**
+    * Handle when the user wants to add another user as a contact
+    */
     const handleAddContact = async () => {
         try {
             const addContactResult = await axios.post('http://localhost:4000/api/contact', 
@@ -59,6 +66,19 @@ export default function Info() {
         }
     }
 
+    /**
+     * Blocks a contact by sending a POST request to the server.
+     *
+     * This function sends a request to the API to block a specific contact 
+     * by providing the contact's ID and block status. If the request is 
+     * successful, an alert is displayed with the response message.
+     * If the request fails, an error alert is shown, and errors are logged.
+     * 
+     * @async
+     * @function handleBlockContact
+     * @returns {Promise<void>} Resolves once the contact is blocked or an error is handled.
+     * @throws Will show an error alert if the request fails or there is a server error.
+     */
     const handleBlockContact = async () => {
         try {
             const blockContactResult = await axios.post('http://localhost:4000/api/user', 
@@ -102,6 +122,19 @@ export default function Info() {
         }
     }
 
+    /**
+     * Unblocks a contact by sending a POST request to the server.
+     *
+     * This function sends a request to the API to unblock a specific contact 
+     * by providing the contact's ID and block status. If the request is 
+     * successful, an alert is displayed with the response message.
+     * If the request fails, an error alert is shown, and errors are logged.
+     * 
+     * @async
+     * @function handleUnblockContact
+     * @returns {Promise<void>} Resolves once the contact is unblocked or an error is handled.
+     * @throws Will show an error alert if the request fails or there is a server error.
+     */
     const handleUnblockContact = async () => {
         try {
             const blockContactResult = await axios.post('http://localhost:4000/api/user', 
@@ -145,6 +178,19 @@ export default function Info() {
         }
     }
 
+    /**
+     * Deletes a contact by sending a POST request to the server.
+     *
+     * This function sends a request to the API to delete a specific contact 
+     * by providing the contact's ID. If the request is successful, an alert 
+     * is displayed with the response message and navigates back to the previous screen.
+     * If the request fails, an error alert is shown, and errors are logged.
+     * 
+     * @async
+     * @function handleDeleteContact
+     * @returns {Promise<void>} Resolves once the contact is deleted or an error is handled.
+     * @throws Will show an error alert if the request fails or there is a server error.
+     */
     const handleDeleteContact = async () => {
         try {
             const deleteContactResult = await axios.post('http://localhost:4000/api/contact', 
@@ -187,6 +233,19 @@ export default function Info() {
         }
     }
 
+    /**
+     * Reports a user by sending a POST request to the server.
+     *
+     * This function sends a request to the API to report a specific user 
+     * by providing the user's ID. If the request is successful, an alert 
+     * is displayed with the response message.
+     * If the request fails, an error alert is shown, and errors are logged.
+     * 
+     * @async
+     * @function handleReportUser
+     * @returns {Promise<void>} Resolves once the user is reported or an error is handled.
+     * @throws Will show an error alert if the request fails or there is a server error.
+     */
     const handleReportUser = async () => {
         try {
             const deleteContactResult = await axios.post('http://localhost:4000/api/user', 

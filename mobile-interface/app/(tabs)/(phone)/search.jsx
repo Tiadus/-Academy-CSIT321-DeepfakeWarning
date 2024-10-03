@@ -11,6 +11,18 @@ export default function Search() {
     const [searchedUsers, setSearchedUsers] = useState([]);
     const [searchedName, setSearchedName] = useState('');
 
+    /**
+     * Retrieves users from the server based on a specified name.
+     *
+     * This function sends a GET request to the API to fetch users that match
+     * the provided name. If the request is successful, the retrieved users are
+     * stored in the state. In case of an error, the error is logged to the console.
+     * 
+     * @async
+     * @function retrieveUsers
+     * @returns {Promise<void>} Resolves once the users are retrieved or an error is handled.
+     * @throws Will log errors to the console if the request fails.
+     */
     const retrieveUsers = async () => {
         try{
             const users = await axios.get(`http://localhost:4000/api/user?name=${searchedName}`);

@@ -12,12 +12,27 @@ export default function Contact() {
     const isFocused = useIsFocused();
     const [contacts, setContacts] = useState([]);
 
+    //Reset the data upon focus
     useEffect(() => {
         if (isFocused == true) {
             retrieveContacts('');
         }
     }, [isFocused])
 
+    /**
+     * Retrieves contacts from the server based on a specified name.
+     *
+     * This function sends a GET request to the API to fetch contacts that match
+     * the provided name. The authorization header is included for authentication.
+     * If the request is successful, the retrieved contacts are stored in the state. 
+     * In case of an error, the error is logged to the console.
+     * 
+     * @async
+     * @function retrieveContacts
+     * @param {string} name - The name to filter contacts by.
+     * @returns {Promise<void>} Resolves once the contacts are retrieved or an error is handled.
+     * @throws Will log errors to the console if the request fails.
+     */
     const retrieveContacts = async (name) => {
         try{
             const contacts = await axios.get(`http://localhost:4000/api/contact?name=${name}`, {
@@ -34,6 +49,17 @@ export default function Contact() {
           }
     }
 
+    /**
+     * Handles the press event for the search icon by navigating to the search page.
+     *
+     * This function attempts to push the user to the search page using the router.
+     * In case of an error during the navigation process, the error is logged to the console.
+     * 
+     * @async
+     * @function handleSearchIconPress
+     * @returns {Promise<void>} Resolves once the navigation is attempted or an error is handled.
+     * @throws Will log errors to the console if the navigation fails.
+     */
     const handleSearchIconPress = async () => {
         try {
             router.push('/search')

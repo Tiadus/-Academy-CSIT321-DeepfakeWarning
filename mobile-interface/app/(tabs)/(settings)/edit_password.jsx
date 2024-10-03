@@ -12,6 +12,7 @@ export default function Edit_Password() {
     const [userPassword, onChangeUserPassword] = useState('');
     const [userConfirmPassword, onChangeUserConfirmPassword] = useState('');
 
+    //Reset data upon focused
     useEffect(() => {
         if (isFocused == true) {
           try {
@@ -22,6 +23,21 @@ export default function Edit_Password() {
         }
     }, [isFocused])
 
+    /**
+     * Saves the new password by sending a POST request to update the user's profile.
+     *
+     * This function validates that the password fields are filled and that they match. 
+     * If the validation is successful, it sends a request to the API to update the user's 
+     * password. Upon successful update, an alert is shown to confirm the change, and the 
+     * user information is updated in the state. If there are errors during the process, 
+     * appropriate alerts are shown.
+     * 
+     * @async
+     * @function savePassword
+     * @returns {Promise<void>} Resolves once the password is saved or an error is handled.
+     * @throws Will show alerts for empty fields, mismatched passwords, invalid credentials, 
+     *         or other errors.
+     */
     const savePassword = async () => {
         if (userPassword === '' || userConfirmPassword === '') {
             Alert.alert(

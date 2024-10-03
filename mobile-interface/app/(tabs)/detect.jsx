@@ -18,6 +18,7 @@ export default function Upload() {
     const safeColorSet = ['#096B00', '#11D100'];
     const dangerColorSet = ['#790000', '#A50000'];
 
+    //Reset data upon focused
     useEffect(() => {
         if (isFocused == true) {
             setFile(null);
@@ -26,12 +27,25 @@ export default function Upload() {
         }
     }, [isFocused])
 
+    //Handle when the user reset the process
     const handleReset = async () => {
         setFile(null);
         setResult(null);
         setAnalyseMode(false);
     }
 
+    /**
+     * Handles the file upload by allowing the user to pick a file from their device.
+     *
+     * This function uses the DocumentPicker to open a file picker dialog, allowing the user 
+     * to select a file. If a file is selected, it updates the state with the selected file. 
+     * If the user cancels the picker or an error occurs, the appropriate message is logged to the console.
+     * 
+     * @async
+     * @function handleFileUploaded
+     * @returns {Promise<void>} Resolves once a file is selected or an error is handled.
+     * @throws Will log messages to the console for canceled actions or other errors.
+     */
     const handleFileUploaded = async () => {
         try {
             const result = await DocumentPicker.pick({
@@ -49,6 +63,19 @@ export default function Upload() {
         }
     }
 
+    /**
+     * Handles the detection of a selected file by validating its type and uploading it to the server.
+     *
+     * This function checks if a file has been selected, verifies that it is of the type FLAC, 
+     * and prepares it for upload. If the file type is valid, it creates a FormData object and 
+     * sends a POST request to upload the file to the server. The response message is stored in the state.
+     * If any errors occur, appropriate alerts are shown, or errors are logged to the console.
+     * 
+     * @async
+     * @function handleFileDetect
+     * @returns {Promise<void>} Resolves once the file detection and upload process is attempted or an error is handled.
+     * @throws Will show alerts for missing files, invalid file types, or log errors to the console.
+     */
     const handleFileDetect = async () => {
         try {
             if (!file) {
@@ -108,6 +135,19 @@ export default function Upload() {
         }
     }
 
+    /**
+     * Handles the file selection and detection process.
+     *
+     * This function checks if a file has been selected. If no file is selected, it invokes 
+     * the `handleFileUploaded` function to prompt the user to upload a file. If a file is 
+     * already selected, it calls the `handleFileDetect` function to proceed with the file 
+     * detection process. Any errors encountered during this process are logged to the console.
+     * 
+     * @async
+     * @function handleFile
+     * @returns {Promise<void>} Resolves once the file handling process is attempted or an error is handled.
+     * @throws Will log errors to the console if they occur during file handling.
+     */
     const handleFile = async () => {
         try {
             if (!file) {

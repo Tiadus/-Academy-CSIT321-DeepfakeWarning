@@ -13,6 +13,7 @@ export default function Edit_Profile() {
     const [userEmail, onChangeUserEmail] = useState(user.email);
     const [userPhone, onChangeUserPhone] = useState(user.phone);
 
+    //Reset data upon focused
     useEffect(() => {
         if (isFocused == true) {
           try {
@@ -25,6 +26,20 @@ export default function Edit_Profile() {
         }
     }, [isFocused])
 
+    /**
+     * Saves the user's profile information by sending a POST request to update the profile.
+     *
+     * This function validates that the user name, email, and phone fields are filled. 
+     * If validation is successful, it sends a request to the API to update the user's 
+     * profile information. Upon successful update, an alert is shown to confirm the 
+     * change, and the user information is updated in the state. If there are errors 
+     * during the process, appropriate alerts are shown.
+     * 
+     * @async
+     * @function saveProfile
+     * @returns {Promise<void>} Resolves once the profile information is saved or an error is handled.
+     * @throws Will show alerts for empty fields, invalid credentials, or other errors.
+     */
     const saveProfile = async () => {
         if (userName === '' || userEmail === '' || userPhone === '') {
             Alert.alert(

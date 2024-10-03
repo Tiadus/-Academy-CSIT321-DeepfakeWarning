@@ -23,6 +23,7 @@ export default function Incall() {
     // Handle the HTTP error, e.g., show an alert or retry logic
   };
 
+  //Load the webview when the screen is loaded
   useEffect(() => {
     if (viewLoaded === true) {
       const message = JSON.stringify(callProcess);
@@ -30,6 +31,7 @@ export default function Incall() {
     }
   }, [viewLoaded])
 
+  //Exit the screen if the webview terminate the call
   const onMessage = (event) => {
     const message = event.nativeEvent.data;
     if (message === "End Call") {

@@ -17,6 +17,17 @@ export default function Education() {
 
     const [titles, setTitles] = useState([]);
 
+    /**
+     * Retrieves the lesson title from the server based on the specified ID.
+     *
+     * This function sends a GET request to the API to fetch all 
+     * the lessons title and their id
+     * 
+     * @async
+     * @function retrieveContentBody
+     * @returns {Promise<void>} Resolves once the titles is retrieved or an error is handled.
+     * @throws Will log errors to the console if the request fails.
+     */
     const retrieveEducationTitles = async () => {
         try{
             const titleRequestResult = await axios.get('http://localhost:4000/api/education?mode=title');

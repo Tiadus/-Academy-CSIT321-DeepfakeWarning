@@ -13,6 +13,21 @@ export default function Signup() {
   const [userPassword, onChangeUserPassword] = useState('');
   const [userConfirmPassword, onChangeUserConfirmPassword] = useState('');
   
+  /**
+   * Handles user registration by sending a POST request to the server.
+   *
+   * This function validates the input fields to ensure all required information 
+   * is provided and that the phone number is numeric. It also checks if the 
+   * password and confirmation match. Upon successful registration, an alert is shown 
+   * to confirm the account registration and redirect to the sign-in page. 
+   * If there are errors during the process, appropriate alerts are shown.
+   * 
+   * @async
+   * @function handleRegister
+   * @returns {Promise<void>} Resolves once the user is registered or an error is handled.
+   * @throws Will show alerts for empty fields, non-numeric phone numbers, 
+   *         mismatched passwords, or other errors.
+   */
   const handleRegister = async () => {
     if (userName === '' || userEmail === '' || userPhone === '' || userPassword === '' || userConfirmPassword === '') {
       Alert.alert(

@@ -21,6 +21,7 @@ export default function Home() {
   const [value, setValue] = useState("in");
   const [statistic, setStatistic] = useState({})
 
+  //Reset data upon focused
   useEffect(() => {
       if (isFocused == true) {
         try {
@@ -31,6 +32,19 @@ export default function Home() {
       }
   }, [isFocused])
 
+  /**
+   * Retrieves statistical data from the server.
+   *
+   * This function sends a GET request to the API to fetch statistics. It includes 
+   * the necessary authorization headers for user authentication. Upon receiving the 
+   * response, it updates the state with the retrieved statistic data. If an error 
+   * occurs during the request, it logs the error to the console.
+   * 
+   * @async
+   * @function retrieveStatistic
+   * @returns {Promise<void>} Resolves once the statistical data retrieval is attempted or an error is handled.
+   * @throws Will log errors to the console if they occur during the data retrieval process.
+   */
   const retrieveStatistic = async () => {
     try{
         const statisticRequest = await axios.get('http://localhost:4000/api/statistic', {

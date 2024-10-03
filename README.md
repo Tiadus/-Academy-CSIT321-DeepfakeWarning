@@ -41,24 +41,25 @@ interface, mobile-interface. In each of the terminal, use the command:
 </ul>
 
 <h2>Application Configuration Setup</h2>
-In the project folder, create a file name "app-config.js" with the file content as below: 
-![image](https://github.com/user-attachments/assets/3f496f5c-dd17-4b22-be78-d9e139ab75ed)
-
-After creating the "app-config.js" in the main folder, copy that file. 
-Navigate to the folder "server-main", paste the config file in it. 
-Navigate to the "web-interface/src" folder, paste the config file. 
+Agora Calling Setup: <br/>
+<ul><li>In the folder “src” within the folder web-interface, you will find a file named “app
+config.example”. First, create a file “app-config.js”. Then, copy the content of the 
+“app-config.example” over. Remember to use your Agora App Id. </li></ul>
+Model Boundary Setup: <br/>
+<ul><li>In the folder “server-main”, you can find the file “server-main-config.js”. Here, you 
+can customize the boundary score, resulted from the analysis of the model in which 
+the server will flag if a file is deepfake or not.</li></ul>
+Database Setup: <br/>
+<ul><li>In the folder “server-main”, you can find the file “db-config.js”. Here, you can 
+customize the connection of your database. Make sure that the user and password of 
+the connection is the same one that you setup for your MySQL database.</li></ul>
 
 <h2>Frontend Data Setup</h2>
 Navigate to the "public" folder located within "web-interface" folder, create a new folder 
 name "audiofiles". 
 Put two files sample.flac which should be an audio file contain a real voice and 
 fake_sample.mp3 which should contain deepfake into the folder. Note that names and types 
-of both files must be exactly the same as stated. 
-
-<h2>Backend Audio Path Setup</h2>
-Navigate to the folder "server-main", create a folder name "audio_files". This is the folder to 
-store the audio files which are sent from the frontend to analyse for deepfake content. 
-Backend Mock Database Setup
+of both files must be exactly the same as stated.
 
 <h2>Database Setup</h2>
 Change directory in terminal to folder "DB_Deployment" located within the folder "server
@@ -71,18 +72,24 @@ interface” which represent the server, web interface and mobile interface then
 up with command “npm start”.
 
 <h2>Known Bug & Mitigation</h2>
-
-A module that was compiled using NumPy 
-1.x cannot be run with NumPy 2.0.0
-
-Mitigation: This error happens because of incompatible 
+A module that was compiled using NumPy 1.x cannot be run with NumPy 2.0.0:
+<ul><li>Mitigation: This error happens because of incompatible 
 Numpy version. To fix this, simply uninstall 
 the current Numpy and install Numpy 1.x 
 with command [pip install “numpy<2.0”] 
-and restart your machine. 
+and restart your machine.</li></ul>
 
-Machine learning model using CPU instead of GPU
-
-Mitigation: This error happens because the CUDA 
+Machine learning model using CPU instead of GPU <br/>
+<ul><li>Mitigation: This error happens because the CUDA 
 version does not come with pytorch. Make 
-sure your CUDA comes with pytorch.
+sure your CUDA comes with pytorch.</li></ul>
+
+Android simulator can not connect to the server even though the server is on:
+<ul><li>Mitigation: This error happens because android 
+simulator treats the localhost as its own 
+device. To fix this, please open a terminal 
+while making sure that the simulator is 
+opened. Then type the following command: <br/>
+<ul><li>adb reverse tcp:4000 tcp:4000</li></ul>
+You can replace “4000” with whatever port 
+your server is running on </li></ul>

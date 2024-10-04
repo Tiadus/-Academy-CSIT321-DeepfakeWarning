@@ -56,6 +56,7 @@ const Gate = ({setUser}) => {
             return;
           } else {
             console.log(error);
+            alert(error)
           }
         }
       }

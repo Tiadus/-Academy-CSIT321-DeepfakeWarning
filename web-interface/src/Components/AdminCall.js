@@ -320,7 +320,7 @@ const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
    * @param {string} audioType - The type of audio input, either 'mic' or 'file'.
    * @throws {Error} If the API request fails, the error is logged to the console.
    */
-  const acceptCall = async (audioType) => {
+  const acceptCall = async (audioType, fileType) => {
     try {
       await axios.post('http://localhost:4000/api/communication', {
         mode: 'receive',
@@ -336,7 +336,7 @@ const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
       if (audioType === 'mic') {
         initRtc(incoming.room_id);
       } else if (audioType === 'file') {
-        handleAnswerWithAudioFile(incoming.room_id)
+        handleAnswerWithAudioFile(incoming.room_id, fileType)
       }
     } catch (error) {
       console.log(error);
@@ -386,10 +386,10 @@ const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
    * @param {string} receiver_action - The action to take upon receiving the call (e.g., 'accept' or 'decline').
    * @param {string} audioType - The type of audio input for the call (e.g., 'mic' or 'file').
    */
-  const handleReceiveCall = async (receiver_action, audioType) => {
+  const handleReceiveCall = async (receiver_action, audioType, fileType) => {
     switch (receiver_action) {
       case 'accept':
-        await acceptCall(audioType);
+        await acceptCall(audioType, fileType);
         break;
       case 'decline':
         await declineCall();
@@ -453,12 +453,20 @@ const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
    *
    * @param {string} channel - The channel to join for the call.
    */
-  const handleAnswerWithAudioFile = async (channel) => {
+  const handleAnswerWithAudioFile = async (channel, fileType) => {
     await rtcClient.join(config.appId, channel, config.token, user.user_id);
 
-    const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-      source: '/audiofiles/fake_sample.mp3'
-    });
+    let fileAudioTrack = null;
+
+    if (fileType === 'real') {
+      fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
+        source: '/audiofiles/sample.flac'
+      });
+    } else if (fileType === 'deepfake') {
+      fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
+        source: '/audiofiles/fake_sample.mp3'
+      });
+    }
 
     fileAudioTrack.startProcessAudioBuffer();
 

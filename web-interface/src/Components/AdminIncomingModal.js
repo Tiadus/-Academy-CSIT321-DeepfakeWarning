@@ -31,14 +31,27 @@ function AdminIncomingModal(props) {
         <div class="col-12 d-flex justify-content-center align-items-center mt-3">
             <button 
                 type="button" 
+                class="btn btn-success btn-lg btn-group d-flex justify-content-center align-items-center" 
+                style={{width: '85%', textAlign: 'center', clear: 'left'}}
+                id="audio-file-button"
+                onClick={() => {
+                    props.handleReceiveCall('accept', 'file', 'real');
+                }}
+            >
+                <span>Answer With Real Audio File</span>
+            </button>
+        </div>
+        <div class="col-12 d-flex justify-content-center align-items-center mt-3">
+            <button 
+                type="button" 
                 class="btn btn-info btn-lg btn-group d-flex justify-content-center align-items-center" 
                 style={{width: '85%', textAlign: 'center', clear: 'left'}}
                 id="audio-file-button"
                 onClick={() => {
-                    props.handleReceiveCall('accept', 'file');
+                    props.handleReceiveCall('accept', 'file', 'deepfake');
                 }}
             >
-                <span>Answer With Audio File</span>
+                <span>Answer With Deepfake Audio File</span>
             </button>
         </div>
         <div class="col-12 d-flex justify-content-center align-items-center mt-3">

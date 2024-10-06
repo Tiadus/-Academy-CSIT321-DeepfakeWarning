@@ -70,7 +70,8 @@ Alternatively, in the same folder, use the command "node dropDB.js" to drop the 
 Navigates into the three folders simultaneously "server-main" and "web-interface", which represent the server and web interface then start them all up with command “npm start”. <br/>
 Once the web interface is started up, the React app will let you know which address and port that it can be found on the network. For example: “192.168.56.1:3000” means addresss 192.168.56.1 at port 3000. <br/>
 Copy both the address and port then go into the folder “mobile-interface”, then folder “app” and open the file incall.jsx. At the bottom of the file is the rendering of the component WebView which open the call functionality in the web interface for the mobile interface. Change the uri using the copied address and port. For example, with the above address and port, the uri should be 'http://192.168.56.1:3000/client'.<br/>
-Note that the route “/client” need to be kept.
+Note that the route “/client” need to be kept.<br/>
+Finally, in the folder “mobile-interface”, start up with command “npm start”.
 
 <h2>Known Bug & Mitigation</h2>
 A module that was compiled using NumPy 1.x cannot be run with NumPy 2.0.0:

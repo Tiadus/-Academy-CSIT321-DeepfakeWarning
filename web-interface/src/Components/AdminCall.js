@@ -428,7 +428,7 @@ const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
    */
   const handleInputSwitchToAudioFile = async () => {
     const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-      source: '/audiofiles/sample.flac'
+      source: '/audiofiles/fake_sample.mp3'
     });
 
     fileAudioTrack.startProcessAudioBuffer();

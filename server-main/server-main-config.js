@@ -3,7 +3,7 @@ const server_main_port = 4000;
 const server_main_ws = 'ws://localhost:' + server_main_port;
 const server_main_http = 'http://localhost:' + server_main_port;
 
-const model_conversation_boundary = 0; //Bigger Is Considered To Be Deepfake Contaminated
+const model_conversation_boundary = [1,-6.5]; //Upper & Lower Boundary For Safe Score
 const model_file_boundary = -1.5; //Bigger Is Considered To Be Deepfake Contaminated
 
 const config = {

@@ -1030,8 +1030,8 @@ async function runModel(clientID, fileName, room_id, deepfake_status) {
 
       const evaluatedScore = parseFloat(stdout);
 
-      if (parseFloat(evaluatedScore) > APP_CONFIG.model_conversation_boundary) {
-        console.log(`File ${fileName} is suspected of deepfake with score = ${parseFloat(evaluatedScore)}`);
+      if (parseFloat(evaluatedScore) > APP_CONFIG.model_conversation_boundary[0] || parseFloat(evaluatedScore) < APP_CONFIG.model_conversation_boundary[1]) {
+        console.log(`D:${fileName}:${parseFloat(evaluatedScore)}`);
     
         try{
           clients.forEach((client) => {
@@ -1053,12 +1053,12 @@ async function runModel(clientID, fileName, room_id, deepfake_status) {
             console.log('Error occured while transmitting message to client with id: ' + clientID);
         }
       } else {
-        console.log(`File ${fileName} is safe with score = ${parseFloat(evaluatedScore)}`);
+        console.log(`S:${fileName}:${parseFloat(evaluatedScore)}`);
       }
 
       // Append data to the file if the user has id 1 (The Victim)
       try {
-        if (clientID == 1) {
+        if (clientID == 1 || clientID == -15) {
           const dataToAppend = `${clientID}:${fileName}:${evaluatedScore}\n`;
           fs.appendFileSync('log.txt', dataToAppend);
           console.log('Data appended to file!');

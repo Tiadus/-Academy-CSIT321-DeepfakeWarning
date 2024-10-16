@@ -428,7 +428,7 @@ const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
    */
   const handleInputSwitchToAudioFile = async () => {
     const fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-      source: '/audiofiles/fake_sample.mp3'
+      source: `/audiofiles/${config.fake_audio}`
     });
 
     fileAudioTrack.startProcessAudioBuffer();
@@ -460,11 +460,11 @@ const AdminCall = ({user, setUser, webSocket, incoming, setIncoming}) => {
 
     if (fileType === 'real') {
       fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-        source: '/audiofiles/sample.flac'
+        source: `/audiofiles/${config.real_audio}`
       });
     } else if (fileType === 'deepfake') {
       fileAudioTrack = await AgoraRTC.createBufferSourceAudioTrack({
-        source: '/audiofiles/fake_sample.mp3'
+        source: `/audiofiles/${config.fake_audio}`
       });
     }
 

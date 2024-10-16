@@ -9,6 +9,9 @@ const Agora_AppID = 'YOUR APP ID'; //Your Agora App ID
 const Agora_Token = null;
 const Agora_Channel = 'main'
 
+const real_audio = 'sample.m4a'; // Name of real audio sample in folder audiofiles
+const fake_audio = 'fake_sample.mp3' // Name of fake audio sample in folder audiofiles
+
 const config = {
     server_main_port: server_main_port,
     server_main_ws: server_main_ws,

@@ -131,10 +131,10 @@ export default function Signin() {
         </View>
         <View className="w-10/12 gap-y-3 mb-4">
           <View className="w-full">
-            <Text className="font-bold text-lg text-text-primary mb-2">Email/Phone Number</Text>
+            <Text className="font-bold text-lg text-text-primary mb-2">Email</Text>
             <TextInput
               className="border-2 border-border-outline rounded-xl p-2 text-text-primary"
-              placeholder="Enter Your Email/Phone Number"
+              placeholder="Enter Your Email"
               placeholderTextColor="#F1F1F1"
               onChangeText={(value) => onChangeUserEmail(value)}
             />
